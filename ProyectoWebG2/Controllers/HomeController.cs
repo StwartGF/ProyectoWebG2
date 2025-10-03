@@ -6,27 +6,35 @@ namespace ProyectoWebG2.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
-
+        // /  y  /inicio  -> Index
+        [HttpGet("")]
+        [HttpGet("inicio")]
         public IActionResult Index()
         {
             return View();
         }
 
-        public IActionResult Privacy()
+        // /login  -> Login (tu pantalla externa)
+        [HttpGet("login")]
+        public IActionResult Login()
         {
             return View();
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
+        [HttpGet]
+        public IActionResult Register()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            ViewData["Title"] = "Registro";
+            return View(); // Views/Home/Register.cshtml
         }
+
+        // /recuperar
+        [HttpGet]
+        [Route("recuperar")]
+        public IActionResult Recuperar()
+        {
+            return View();
+        }
+
     }
 }

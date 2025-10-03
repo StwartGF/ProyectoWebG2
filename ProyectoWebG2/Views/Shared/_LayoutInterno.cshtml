@@ -1,0 +1,108 @@
+﻿@{
+    var title = ViewData["Title"] as string ?? "Dashboard";
+}
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>@title - ProyectoWebG2</title>
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/css/coreui.min.css" />
+
+  <!-- Tus estilos -->
+  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+  <style>
+    .brand-blob{width:28px;height:28px;border-radius:8px;background:#6610f2;display:inline-block}
+    .sidebar .nav-link.active{background:var(--cui-body-bg);color:var(--cui-emphasis-color)}
+  </style>
+</head>
+<body>
+  <!-- Sidebar -->
+  <div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
+    <div class="sidebar-header border-bottom">
+      <div class="sidebar-brand d-flex align-items-center gap-2">
+        <span class="brand-blob"></span>
+        <span class="fw-semibold">ProyectoWebG2</span>
+      </div>
+      <button class="btn-close d-lg-none" type="button" aria-label="Close"
+              onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
+    </div>
+
+    <ul class="sidebar-nav" data-coreui="navigation" data-simplebar>
+      <li class="nav-item">
+        <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString()=="Index"?"active":null)"
+           asp-controller="Home" asp-action="Index">
+          <span class="nav-icon"></span> Dashboard
+          <span class="badge badge-sm bg-info ms-auto">NEW</span>
+        </a>
+      </li>
+
+      <li class="nav-title">Páginas</li>
+      <li class="nav-item">
+        <a class="nav-link" asp-controller="Home" asp-action="Login">
+          <span class="nav-icon"></span> Login
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" asp-controller="Home" asp-action="Register">
+          <span class="nav-icon"></span> Register
+        </a>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer border-top d-none d-md-flex">
+      <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>
+    </div>
+  </div>
+
+  <!-- Wrapper -->
+  <div class="wrapper d-flex flex-column min-vh-100">
+    <!-- Header -->
+    <header class="header header-sticky p-0 mb-4">
+      <div class="container-fluid border-bottom px-4 d-flex align-items-center">
+        <button class="header-toggler me-3" type="button"
+                onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"
+                style="margin-inline-start:-14px;">
+          <i class="icon cil-menu"></i>
+        </button>
+        <ul class="header-nav d-none d-lg-flex">
+          <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Users</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Settings</a></li>
+        </ul>
+        <ul class="header-nav ms-auto">
+          <li class="nav-item"><a class="nav-link" href="#">🔔</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">✉️</a></li>
+        </ul>
+      </div>
+      <div class="container-fluid px-4">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb my-0">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item active"><span>@title</span></li>
+          </ol>
+        </nav>
+      </div>
+    </header>
+
+    <!-- Contenido -->
+    <div class="body flex-grow-1">
+      <div class="container-lg px-4">
+        @RenderBody()
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer px-4">
+      <div>© @DateTime.Now.Year ProyectoWebG2</div>
+      <div class="ms-auto">CoreUI layout</div>
+    </footer>
+  </div>
+
+  <!-- CoreUI JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/js/coreui.bundle.min.js" defer></script>
+  @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

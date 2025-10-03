@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Recuperar contraseña";
+    Layout = "_LayoutExterno";
+}
+
+<div class="bg-body-tertiary min-vh-100 d-flex flex-row align-items-center">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card mb-4 mx-4 shadow-sm">
+                    <div class="card-body p-4">
+                        <h1 class="h3 mb-1">¿Olvidaste tu contraseña?</h1>
+                        <p class="text-body-secondary mb-4">
+                            Ingresa tu correo y te enviaremos un enlace para restablecerla.
+                        </p>
+
+                        <form>
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">
+                                    <svg class="icon">
+                                        <use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3.0.1/sprites/free.svg#cil-envelope-open"></use>
+                                    </svg>
+                                </span>
+                                <input class="form-control" type="email" placeholder="tu@correo.com" />
+                            </div>
+
+                            <button type="button" class="btn btn-primary w-100">
+                                Enviar enlace de recuperación
+                            </button>
+                        </form>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="Home" asp-action="Login" class="btn btn-link px-0">
+                                ← Volver al login
+                            </a>
+                            <a asp-controller="Home" asp-action="Register" class="btn btn-link px-0">
+                                Crear cuenta
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,50 +1,79 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var title = ViewData["Title"] as string ?? "ProyectoWebG2";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - ProyectoWebG2</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@(ViewData["Title"]) - ProyectoWebG2</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/css/coreui.min.css" />
+
+    <!-- Tus estilos de proyecto -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/ProyectoWebG2.styles.css" asp-append-version="true" />
 </head>
+
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <!-- Navbar con clases Bootstrap/CoreUI y data-coreui-* para la colapsable -->
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">ProyectoWebG2</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                <a class="navbar-brand fw-semibold" asp-area="" asp-controller="Home" asp-action="Index">
+                    ProyectoWebG2
+                </a>
+
+                <!-- Botón hamburguesa -->
+                <button class="navbar-toggler" type="button"
+                        data-coreui-toggle="collapse" data-coreui-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+
+                <!-- Menú colapsable -->
+                <div id="mainNav" class="collapse navbar-collapse">
+                    <ul class="navbar-nav ms-auto">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        <!-- Ejemplo: botón de acción con estilo CoreUI/Bootstrap -->
+                        <!-- <li class="nav-item ms-sm-2">
+                            <a class="btn btn-primary" asp-controller="Auth" asp-action="Login">Login</a>
+                        </li> -->
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - ProyectoWebG2 - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+    <footer class="border-top footer text-muted py-3">
+        <div class="container d-flex justify-content-between small">
+            <span>&copy; @DateTime.Now.Year - ProyectoWebG2</span>
+            <a class="text-decoration-none" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- CoreUI JS (colócalo SIEMPRE antes de cerrar body) -->
+    <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/js/coreui.bundle.min.js" defer></script>
+
+    <!-- Si tenías jQuery o bootstrap.bundle locales, mejor NO cargarlos para evitar duplicados:
+         <script src="~/lib/jquery/dist/jquery.min.js"></script>
+         <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    -->
+
+    <!-- Tu JS de proyecto -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

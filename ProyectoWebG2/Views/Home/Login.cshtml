@@ -1,0 +1,53 @@
+﻿@{
+    Layout = "_LayoutExterno";
+    ViewData["Title"] = "Login";
+}
+
+<div class="auth-wrap">
+    <div class="card-group d-block d-md-flex row auth-card">
+        <!-- Columna: Login -->
+        <div class="card col-md-7 p-4 mb-0">
+            <div class="card-body">
+                <h1 class="h3 mb-1">Login</h1>
+                <p class="text-body-secondary mb-4">Sign in to your account</p>
+
+                <form id="formLogin">
+                    <div class="mb-3">
+                        <label class="form-label">Usuario o correo</label>
+                        <input class="form-control" type="text" placeholder="you@example.com" />
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Contraseña</label>
+                        <input class="form-control" type="password" placeholder="••••••" />
+                    </div>
+
+                    <div class="row align-items-center">
+                        <div class="col-6">
+                            <!-- Navegación simulada al “dashboard” -->
+                            <a class="btn btn-primary px-4" asp-controller="Home" asp-action="Index">Login</a>
+                        </div>
+                        <div class="col-6 text-end">
+                            <a asp-controller="Home" asp-action="Recuperar">¿Olvidaste la contraseña?</a>
+
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Columna: Sign up -->
+        <div class="card col-md-5 text-white bg-primary py-5">
+            <div class="card-body text-center d-flex align-items-center justify-content-center">
+                <div>
+                    <h2 class="h3 mb-3">Sign up</h2>
+                    <p class="opacity-75 mb-4">Crea tu cuenta para acceder a todas las funciones del sistema.</p>
+                    <a class="btn btn-lg btn-outline-light" asp-controller="Home" asp-action="Register">
+                        Register Now!
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
