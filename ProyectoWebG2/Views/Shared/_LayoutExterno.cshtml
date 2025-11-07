@@ -1,31 +1,73 @@
 ﻿@{
     var title = ViewData["Title"] as string ?? "Auth";
+    var hasMsg = TempData["Msg"] != null;
+    var hasErr = TempData["Error"] != null;
 }
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>@title - ProyectoWebG2</title>
-  <link rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/css/coreui.min.css" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@title - ProyectoWebG2</title>
 
-  <!-- Tus estilos (opcional) -->
-  <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <!-- CoreUI (Bootstrap 5 compatible) -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/css/coreui.min.css" />
 
-  <style>
-    /* Helpers para centrar el formulario a pantalla completa */
-    .auth-wrap { min-height: 100vh; display: grid; place-items: center; background: var(--cui-tertiary-bg,#f5f7fb); }
-    .auth-card { width: min(100%, 880px); }
-  </style>
+    <!-- Tus estilos -->
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <style>
+        /* Helpers para centrar páginas de auth */
+        .auth-wrap {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            background: var(--cui-tertiary-bg, #f5f7fb);
+        }
+
+        .auth-card {
+            width: min(100%, 880px);
+        }
+
+        /* Contenedor de alertas pegado arriba */
+        .global-alerts {
+            position: sticky;
+            top: 0;
+            z-index: 1040; /* por encima del contenido */
+        }
+    </style>
 </head>
 <body>
-  @RenderBody()
 
-  <!-- CoreUI JS -->
-  <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/js/coreui.bundle.min.js" defer></script>
+    <!-- Mensajes globales (TempData) -->
+    <div class="global-alerts">
+        <div class="container mt-3">
+            @if (hasMsg)
+            {
+                <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+                    <strong>Listo:</strong> @TempData["Msg"]
+                    <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (hasErr)
+            {
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+                    <strong>Ups:</strong> @TempData["Error"]
+                    <button type="button" class="btn-close" data-coreui-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+        </div>
+    </div>
 
-  @await RenderSectionAsync("Scripts", required: false)
+    <!-- Contenido de la página -->
+    @RenderBody()
+
+    <!-- CoreUI JS -->
+    <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/js/coreui.bundle.min.js" defer></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
+
 
