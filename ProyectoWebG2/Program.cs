@@ -4,7 +4,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
 
 // HttpClient para consumir la API
-builder.Services.AddHttpClient();
+builder.Services.AddHttpClient("api", client =>
+{
+    client.BaseAddress = new Uri("https://localhost:7201/");
+});
+
 
 // Session para mantener datos del usuario logueado
 builder.Services.AddSession(options =>

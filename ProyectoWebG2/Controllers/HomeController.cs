@@ -30,15 +30,25 @@ namespace ProyectoWebG2.Controllers
         // - Si NO hay sesión -> muestra Login
         // - Si hay sesión     -> muestra tu dashboard (Views/Home/Index.cshtml)
         // ============================================
+
+
+        //[HttpGet("")]
+        //public IActionResult Index()
+        //{
+        //  var logged = HttpContext.Session.GetInt32("ConsecutivoUsuario") != null;
+        //if (!logged)
+        //  return View("Login", new LoginVM()); // formulario
+
+        //            return View("Index"); // tu dashboard interno
+        //      }
+        //-
         [HttpGet("")]
         public IActionResult Index()
         {
-            var logged = HttpContext.Session.GetInt32("ConsecutivoUsuario") != null;
-            if (!logged)
-                return View("Login", new LoginVM()); // formulario
-
-            return View("Index"); // tu dashboard interno
+            // ⚠️ Solo para pruebas
+            return View("Index");
         }
+//-
 
         // ============================================
         // LOGIN (GET) - ruta dedicada al formulario
