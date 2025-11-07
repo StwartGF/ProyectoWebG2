@@ -115,6 +115,65 @@ namespace ProyectoWebG2.Controllers
         }
 
         // ============================================
+        // REGISTRO (GET)
+        // Muestra el formulario de registro
+        // ============================================
+        [HttpGet("registro")]
+        public IActionResult Registro()
+        {
+            return View("Register", new UsuarioModel());
+        }
+
+        // ============================================
+        // REGISTRO (POST)
+        // Llama a: POST {UrlAPI}/Home/Registro
+        // ============================================
+        [HttpPost("registro")]
+        public async Task<IActionResult> RegistroPost(UsuarioModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Complete los campos requeridos.";
+                return View("Register", vm);
+            }
+
+            try
+            {
+                using var http = _factory.CreateClient();
+                var url = $"{ApiBase}Home/Registro";
+
+                var payload = new {
+                    Identificacion = vm.Identificacion,
+                    Nombre = vm.Nombre,
+                    Apellidos = vm.Apellidos,
+                    CorreoElectronico = vm.CorreoElectronico,
+                    Telefono = vm.Telefono,
+                    Fecha_Nacimiento = vm.Fecha_Nacimiento,
+                    NombreUsuario = vm.NombreUsuario,
+                    Contrasenna = vm.Contrasena,
+                    ContrasennaConfirmar = vm.ContrasenaConfirmar,
+                    IdRol = 2
+                };
+
+                var res = await http.PostAsJsonAsync(url, payload);
+
+                if (!res.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo registrar. Verifique los datos o si ya existe el usuario/correo.";
+                    return View("Register", vm);
+                }
+
+                TempData["Msg"] = "Registro exitoso. Ahora puedes iniciar sesión.";
+                return RedirectToAction("Login");
+            }
+            catch
+            {
+                TempData["Error"] = "Ocurrió un error inesperado.";
+                return View("Register", vm);
+            }
+        }
+
+        // ============================================
         // RECUPERAR (GET/POST) — sin cambios
         // ============================================
         [HttpGet("recuperar")]
