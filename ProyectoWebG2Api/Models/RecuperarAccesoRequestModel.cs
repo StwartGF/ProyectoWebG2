@@ -2,11 +2,9 @@
 
 namespace ProyectoWebG2Api.Models
 {
-    public class ValidarSesionRequestModel
+    public class RecuperarAccesoRequestModel
     {
-        [Required]
+        [Required, EmailAddress]
         public string CorreoElectronico { get; set; } = string.Empty;
-        [Required]
-        public string Contrasenna { get; set; } = string.Empty;
     }
 }
