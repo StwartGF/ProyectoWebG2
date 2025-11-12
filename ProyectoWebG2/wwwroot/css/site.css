@@ -29,3 +29,22 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+.btn-primary {
+    background-color: #5A13F2;
+    border-color: #5A13F2;
+}
+
+    .btn-primary:hover {
+        background-color: #4910C9;
+    }
+
+.btnMatricular {
+    background-color: #4F1BBF !important;
+    border-color: #4F1BBF !important;
+    color: white !important;
+}
+
+    .btnMatricular:hover {
+        background-color: #3b1491 !important;
+        border-color: #3b1491 !important;
+    }
