@@ -1,4 +1,4 @@
-﻿@model ProyectoWebG2.Models.LoginVM
+﻿@model LoginVM
 @{
     Layout = "_LayoutExterno";
     ViewData["Title"] = "Iniciar sesión";
@@ -6,7 +6,6 @@
 
 <div class="auth-wrap">
     <div class="card-group d-block d-md-flex row auth-card">
-        <!-- Columna: Login -->
         <div class="card col-md-7 p-4 mb-0">
             <div class="card-body">
                 <h1 class="h3 mb-1">Iniciar sesión</h1>
@@ -21,9 +20,16 @@
                     <div class="alert alert-success">@TempData["Msg"]</div>
                 }
 
-                <form asp-action="LoginPost" asp-controller="Home" method="post" novalidate>
+                <form id="FormIniciarSesion"
+                      class="mb-3"
+                      asp-action="LoginPost"
+                      asp-controller="Home"
+                      method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
                     <div class="mb-3">
-                        <label class="form-label" asp-for="CorreoElectronico">Usuario o correo</label>
+                        <label class="form-label" asp-for="CorreoElectronico">Correo electrónico</label>
                         <input class="form-control" asp-for="CorreoElectronico" placeholder="tu@correo.com" />
                         <span class="text-danger" asp-validation-for="CorreoElectronico"></span>
                     </div>
@@ -39,20 +45,19 @@
                             <button class="btn btn-primary px-4" type="submit">Entrar</button>
                         </div>
                         <div class="col-6 text-end">
-                            <a asp-controller="Home" asp-action="Recuperar">¿Olvidaste la contraseña?</a>
+                            <a asp-controller="Home" asp-action="RecuperarAcceso">¿Olvidaste la contraseña?</a>
                         </div>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Columna: Sign up -->
         <div class="card col-md-5 text-white bg-primary py-5">
             <div class="card-body text-center d-flex align-items-center justify-content-center">
                 <div>
                     <h2 class="h3 mb-3">Regístrate</h2>
                     <p class="opacity-75 mb-4">Crea tu cuenta para acceder a todas las funciones del sistema.</p>
-                    <a class="btn btn-lg btn-outline-light" asp-controller="Home" asp-action="Registro">
+                    <a class="btn btn-lg btn-outline-light" asp-action="Registro" asp-controller="Home">
                         Crear cuenta
                     </a>
                 </div>
@@ -63,5 +68,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/IniciarSesion.js" asp-append-version="true"></script>
 }
-

@@ -67,6 +67,9 @@
     <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/js/coreui.bundle.min.js" defer></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+    @section Scripts {
+        <partial name="_ValidationScriptsPartial" />
+    }
 </body>
 </html>
 
