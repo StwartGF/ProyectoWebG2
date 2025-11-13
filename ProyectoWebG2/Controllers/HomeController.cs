@@ -14,7 +14,7 @@ namespace ProyectoWebG2.Controllers
             _factory = factory;
         }
 
-        #region Iniciar Sesión
+        #region Iniciar Sesiï¿½n
 
         [HttpGet]
         public IActionResult Login()
@@ -31,11 +31,11 @@ namespace ProyectoWebG2.Controllers
 
             if (!res.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Credenciales inválidas.";
+                TempData["Error"] = "Credenciales invï¿½lidas.";
                 return View("Login", usuario);
             }
 
-            // Marca sesión mínima
+            // Marca sesiï¿½n mï¿½nima
             HttpContext.Session.SetString("IsAuth", "1");
             HttpContext.Session.SetString("Email", usuario.CorreoElectronico ?? string.Empty);
 
@@ -64,8 +64,8 @@ namespace ProyectoWebG2.Controllers
 
                 if (!string.Equals(usuario.Contrasena, usuario.ConfirmarContrasena))
                 {
-                    TempData["Error"] = "Las contraseñas no coinciden.";
-                    ModelState.AddModelError(nameof(usuario.ConfirmarContrasena), "Debe coincidir con la contraseña.");
+                    TempData["Error"] = "Las contraseï¿½as no coinciden.";
+                    ModelState.AddModelError(nameof(usuario.ConfirmarContrasena), "Debe coincidir con la contraseï¿½a.");
                     return View("Registro", usuario);
                 }
 
@@ -78,12 +78,77 @@ namespace ProyectoWebG2.Controllers
                         return RedirectToAction("Login", "Home");
                 }
 
-                ViewBag.Mensaje = "No se ha registrado la información";
+                ViewBag.Mensaje = "No se ha registrado la informaciï¿½n";
                 return View();
             }
         }
 
-        #endregion
+
+        // ============================================
+        // REGISTRO (GET)
+        // Muestra el formulario de registro
+        // ============================================
+        [HttpGet("registro")]
+        public IActionResult Registro()
+        {
+            return View("Register", new UsuarioModel());
+        }
+
+        // ============================================
+        // REGISTRO (POST)
+        // Llama a: POST {UrlAPI}/Home/Registro
+        // ============================================
+        [HttpPost("registro")]
+        public async Task<IActionResult> RegistroPost(UsuarioModel vm)
+        {
+            if (!ModelState.IsValid)
+            {
+                TempData["Error"] = "Complete los campos requeridos.";
+                return View("Register", vm);
+            }
+
+            try
+            {
+                using var http = _factory.CreateClient();
+                var url = $"{ApiBase}Home/Registro";
+
+                var payload = new {
+                    Identificacion = vm.Identificacion,
+                    Nombre = vm.Nombre,
+                    Apellidos = vm.Apellidos,
+                    CorreoElectronico = vm.CorreoElectronico,
+                    Telefono = vm.Telefono,
+                    Fecha_Nacimiento = vm.Fecha_Nacimiento,
+                    NombreUsuario = vm.NombreUsuario,
+                    Contrasenna = vm.Contrasena,
+                    ContrasennaConfirmar = vm.ContrasenaConfirmar,
+                    IdRol = 2
+                };
+
+                var res = await http.PostAsJsonAsync(url, payload);
+
+                if (!res.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "No se pudo registrar. Verifique los datos o si ya existe el usuario/correo.";
+                    return View("Register", vm);
+                }
+
+                TempData["Msg"] = "Registro exitoso. Ahora puedes iniciar sesiÃ³n.";
+                return RedirectToAction("Login");
+            }
+            catch
+            {
+                TempData["Error"] = "OcurriÃ³ un error inesperado.";
+                return View("Register", vm);
+            }
+        }
+
+        // ============================================
+        // RECUPERAR (GET/POST) â€” sin cambios
+        // ============================================
+        [HttpGet("recuperar")]
+        public IActionResult Recuperar() => View();
+
 
         #region Recuperar Acceso
 
