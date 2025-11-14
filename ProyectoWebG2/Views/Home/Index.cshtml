@@ -1,231 +1,51 @@
-﻿﻿@{
+﻿@{
 Layout = "_LayoutInterno";
 ViewData["Title"] = "Inicio";
 ViewData["Breadcrumb"] = "Dashboard";
 ViewData["Breadcrumb"] = "Inicio";
 }
 
-<!-- FILA DE CARDS -->
+
 <div class="row g-4 mb-4">
     <div class="col-sm-6 col-xl-3">
         <div class="card text-white bg-primary">
-
-            @@ -16,13 +14,13 @@
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-arrow-bottom"></use></svg>)
-            
-        </div>
-        <div>Users</div>
-        <div>Usuarios</div>
-    </div>
-    <div class="dropdown">
-        <button class="btn btn-transparent text-white p-0" type="button" data-coreui-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-options"></use></svg>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Action</a></div>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Acción</a></div>
-    </div>
-</div>
-<div class="c-chart-wrapper mt-3 mx-3" style="height:70px;">
-
-    @@ -30,7 +28,6 @@
-</div>
-
-<div class="col-sm-6 col-xl-3">
-    <div class="card text-white bg-info">
-        <div class="card-body pb-0 d-flex justify-content-between align-items-start">
-
-            @@ -41,13 +38,13 @@
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-arrow-top"></use></svg>)
-            
-        </div>
-        <div>Income</div>
-        <div>Ingresos</div>
-    </div>
-    <div class="dropdown">
-        <button class="btn btn-transparent text-white p-0" type="button" data-coreui-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-options"></use></svg>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Action</a></div>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Acción</a></div>
-    </div>
-</div>
-<div class="c-chart-wrapper mt-3 mx-3" style="height:70px;">
-
-    @@ -55,7 +52,6 @@
-</div>
-
-<div class="col-sm-6 col-xl-3">
-    <div class="card text-white bg-warning">
-        <div class="card-body pb-0 d-flex justify-content-between align-items-start">
-
-            @@ -66,13 +62,13 @@
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-arrow-top"></use></svg>)
-            
-        </div>
-        <div>Conversion Rate</div>
-        <div>Tasa de conversión</div>
-    </div>
-    <div class="dropdown">
-        <button class="btn btn-transparent text-white p-0" type="button" data-coreui-toggle="dropdown">
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-options"></use></svg>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Action</a></div>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Acción</a></div>
-    </div>
-</div>
-<div class="c-chart-wrapper mt-3" style="height:70px;">
-
-    @@ -80,7 +76,6 @@
-</div>
-
-<div class="col-sm-6 col-xl-3">
-    <div class="card text-white bg-danger">
-        <div class="card-body pb-0 d-flex justify-content-between align-items-start">
-
-            @@ -91,13 +86,13 @@
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-arrow-bottom"></use></svg>)
-            
-        </div>
-        <div>Sessions</div>
-        <div>Sesiones</div>
-    </div>
-    <div class="dropdown">
-        <button class="btn btn-transparent text-white p-0" type="button" data-coreui-toggle="dropdown">
-            <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-options"></use></svg>
-        </button>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Action</a></div>
-        <div class="dropdown-menu dropdown-menu-end"><a class="dropdown-item" href="#">Acción</a></div>
-    </div>
-</div>
-<div class="c-chart-wrapper mt-3 mx-3" style="height:70px;">
-
-    @@ -106,23 +101,21 @@
-</div>
-
-<!-- CARD TRAFFIC -->
-    <div class="card-body">
-        <div class="d-flex justify-content-between">
-            <div>
-                <h4 class="card-title mb-0">Traffic</h4>
-                <div class="small text-body-secondary">January - July 2023</div>
-                <h4 class="card-title mb-0">Tráfico</h4>
-                <div class="small text-body-secondary">Enero - Julio 2023</div>
-            </div>
-            <div class="btn-toolbar d-none d-md-block" role="toolbar">
-                <div class="btn-group btn-group-toggle mx-3" data-coreui-toggle="buttons">
-                    <input class="btn-check" id="option1" type="radio" name="options" autocomplete="off">
-                    <label class="btn btn-outline-secondary"> Day</label>
-                    <label class="btn btn-outline-secondary"> Día</label>
-                    <input class="btn-check" id="option2" type="radio" name="options" autocomplete="off" checked>
-                    <label class="btn btn-outline-secondary active"> Month</label>
-                    <label class="btn btn-outline-secondary active"> Mes</label>
-                    <input class="btn-check" id="option3" type="radio" name="options" autocomplete="off">
-                    <label class="btn btn-outline-secondary"> Year</label>
-                    <label class="btn btn-outline-secondary"> Año</label>
-                </div>
-                    <svg class="icon"><use xlink:href="https://cdn.jsdelivr.net/npm/@@coreui/icons@3/sprites/free.svg#cil-cloud-download"></use></svg>
-
-                    @@ -133,39 +126,38 @@
-                    <canvas class="chart" id="main-chart" height="300"></canvas>
-            </div>
-        </div>
-
-        <div class="card-footer">
-            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 row-cols-xl-5 g-4 mb-2 text-center">
-                <div class="col">
-                    <div class="text-body-secondary">Visits</div>
-                    <div class="fw-semibold text-truncate">29.703 Users (40%)</div>
-                    <div class="text-body-secondary">Visitas</div>
-                    <div class="fw-semibold text-truncate">29.703 Usuarios (40%)</div>
-                    <div class="progress progress-thin mt-2">
-                        <div class="progress-bar bg-success" style="width: 40%"></div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="text-body-secondary">Unique</div>
-                    <div class="fw-semibold text-truncate">24.093 Users (20%)</div>
-                    <div class="text-body-secondary">Únicos</div>
-                    <div class="fw-semibold text-truncate">24.093 Usuarios (20%)</div>
-                    <div class="progress progress-thin mt-2">
-                        <div class="progress-bar bg-info" style="width: 20%"></div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="text-body-secondary">Pageviews</div>
-                    <div class="fw-semibold text-truncate">78.706 Views (60%)</div>
-                    <div class="text-body-secondary">Vistas de página</div>
-                    <div class="fw-semibold text-truncate">78.706 Vistas (60%)</div>
-                    <div class="progress progress-thin mt-2">
-                        <div class="progress-bar bg-warning" style="width: 60%"></div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class="text-body-secondary">New Users</div>
-                    <div class="fw-semibold text-truncate">22.123 Users (80%)</div>
-                    <div class="text-body-secondary">Nuevos usuarios</div>
-                    <div class="fw-semibold text-truncate">22.123 Usuarios (80%)</div>
-                    <div class="progress progress-thin mt-2">
-                        <div class="progress-bar bg-danger" style="width: 80%"></div>
-                    </div>
-                </div>
-                <div class="col d-none d-xl-block">
-                    <div class="text-body-secondary">Bounce Rate</div>
-                    <div class="text-body-secondary">Tasa de rebote</div>
-                    <div class="fw-semibold text-truncate">40.15%</div>
-                    <div class="progress progress-thin mt-2">
-                        <div class="progress-bar" style="width: 40%"></div>
-
-                        @@ -174,8 +166,6 @@
-                    </div>
-                </div>
-            </div>
-
-            <!-- SOCIAL CARDS -->
-            <div class="row g-4 mb-4">
-                <div class="col-sm-6 col-lg-4">
-                    <div class="card" style="--cui-card-cap-bg:#3b5998">
-
-                        @@ -188,13 +178,12 @@
-                    </div>
-                </div>
-                <div class="card-body row text-center">
-                    <div class="col"><div class="fs-5 fw-semibold">89k</div><div class="text-uppercase text-body-secondary small">friends</div></div>
-                    <div class="col"><div class="fs-5 fw-semibold">89k</div><div class="text-uppercase text-body-secondary small">amigos</div></div>
-                    <div class="vr"></div>
-                    <div class="col"><div class="fs-5 fw-semibold">459</div><div class="text-uppercase text-body-secondary small">feeds</div></div>
-                    <div class="col"><div class="fs-5 fw-semibold">459</div><div class="text-uppercase text-body-secondary small">publicaciones</div></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-sm-6 col-lg-4">
-            <div class="card" style="--cui-card-cap-bg:#00aced">
-                <div class="card-header position-relative d-flex justify-content-center align-items-center">
-
-                    @@ -206,13 +195,12 @@
-                </div>
-            </div>
-            <div class="card-body row text-center">
-                <div class="col"><div class="fs-5 fw-semibold">973k</div><div class="text-uppercase text-body-secondary small">followers</div></div>
-                <div class="col"><div class="fs-5 fw-semibold">973k</div><div class="text-uppercase text-body-secondary small">seguidores</div></div>
-                <div class="vr"></div>
-                <div class="col"><div class="fs-5 fw-semibold">1.792</div><div class="text-uppercase text-body-secondary small">tweets</div></div>
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <span>Usuarios</span>
+                <svg class="icon"><use xlink:href="~/icons/free.svg#cil-arrow-bottom"></use></svg>
             </div>
         </div>
     </div>
-
-    <div class="col-sm-6 col-lg-4">
-        <div class="card" style="--cui-card-cap-bg:#4875b4">
-            <div class="card-header position-relative d-flex justify-content-center align-items-center">
-
-                @@ -224,19 +212,17 @@
+    <div class="col-sm-6 col-xl-3">
+        <div class="card text-white bg-info">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <span>Ingresos</span>
+                <svg class="icon"><use xlink:href="~/icons/free.svg#cil-arrow-top"></use></svg>
             </div>
         </div>
-        <div class="card-body row text-center">
-            <div class="col"><div class="fs-5 fw-semibold">500+</div><div class="text-uppercase text-body-secondary small">contacts</div></div>
-            <div class="col"><div class="fs-5 fw-semibold">500+</div><div class="text-uppercase text-body-secondary small">contactos</div></div>
-            <div class="vr"></div>
-            <div class="col"><div class="fs-5 fw-semibold">292</div><div class="text-uppercase text-body-secondary small">feeds</div></div>
-            <div class="col"><div class="fs-5 fw-semibold">292</div><div class="text-uppercase text-body-secondary small">publicaciones</div></div>
+    </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card text-white bg-warning">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <span>Tasa de conversión</span>
+                <svg class="icon"><use xlink:href="~/icons/free.svg#cil-arrow-top"></use></svg>
+            </div>
         </div>
     </div>
+    <div class="col-sm-6 col-xl-3">
+        <div class="card text-white bg-danger">
+            <div class="card-body d-flex align-items-center justify-content-between">
+                <span>Sesiones</span>
+                <svg class="icon"><use xlink:href="~/icons/free.svg#cil-arrow-bottom"></use></svg>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="mb-4 text-center">
+    <a href="@Url.Action("Calificaciones", "Estudiantes")" class="btn btn-primary btn-lg">
+        <svg class="icon me-2"><use xlink:href="~/icons/free.svg#cil-star"></use></svg>
+        Ver mis calificaciones
+    </a>
+</div>
+

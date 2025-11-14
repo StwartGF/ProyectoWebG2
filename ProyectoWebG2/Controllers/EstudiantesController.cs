@@ -95,7 +95,7 @@ namespace ProyectoWebG2.Controllers
                 return RedirectToAction("Login", "Home");
 
             var client = _factory.CreateClient("api");
-            var response = await client.GetAsync($"api/Estudiantes/Calificaciones/{idUsuario}");
+            var response = await client.GetAsync($"https://localhost:7238/api/Estudiantes/Calificaciones/{idUsuario}");
             var data = await response.Content.ReadFromJsonAsync<List<CalificacionCursoVM>>();
             return View(data ?? new List<CalificacionCursoVM>());
         }
