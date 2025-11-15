@@ -1,0 +1,40 @@
+﻿@model ProyectoWebG2.Models.AsistenciaModel
+
+@{
+    Layout = "~/Views/Shared/_LayoutInterno.cshtml";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4 fw-bold">Editar Asistencia</h2>
+
+    <form asp-action="Edit" method="post">
+        <input type="hidden" asp-for="IdAsistencia" />
+
+        <div class="mb-3">
+            <label asp-for="IdUsuario" class="form-label"></label>
+            <input asp-for="IdUsuario" class="form-control" />
+            <span asp-validation-for="IdUsuario" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="IdCurso" class="form-label"></label>
+            <input asp-for="IdCurso" class="form-control" />
+            <span asp-validation-for="IdCurso" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Fecha" class="form-label"></label>
+            <input asp-for="Fecha" type="date" class="form-control" />
+            <span asp-validation-for="Fecha" class="text-danger"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="EstadoAsistencia" class="form-label"></label>
+            <input asp-for="EstadoAsistencia" class="form-control" />
+            <span asp-validation-for="EstadoAsistencia" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Guardar cambios</button>
+        <a asp-action="Index" class="btn btn-secondary ms-2">Volver</a>
+    </form>
+</div>
