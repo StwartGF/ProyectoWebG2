@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using ProyectoWebG2.Models;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace ProyectoWebG2.Controllers
 {
@@ -14,7 +15,7 @@ namespace ProyectoWebG2.Controllers
             _factory = factory;
         }
 
-        #region Iniciar Sesi髇
+        #region Iniciar Sesi贸n
 
         [HttpGet]
         public IActionResult Login()
@@ -31,59 +32,112 @@ namespace ProyectoWebG2.Controllers
 
             if (!res.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Credenciales inv醠idas.";
+                TempData["Error"] = "Credenciales inv谩lidas.";
                 return View("Login", usuario);
             }
 
-            // Marca sesi髇 m韓ima
-            HttpContext.Session.SetString("IsAuth", "1");
-            HttpContext.Session.SetString("Email", usuario.CorreoElectronico ?? string.Empty);
+            // Recibe el usuario autenticado desde la API
+            var loginResponse = await res.Content.ReadFromJsonAsync<UsuarioModel>();
+            if (loginResponse != null)
+            {
+                HttpContext.Session.SetString("IsAuth", "1");
+                HttpContext.Session.SetString("Email", loginResponse.CorreoElectronico ?? string.Empty);
+                HttpContext.Session.SetInt32("ConsecutivoUsuario", loginResponse.ConsecutivoUsuario);
+                HttpContext.Session.SetString("NombreUsuario", loginResponse.Nombre);
+                HttpContext.Session.SetString("NombrePerfil", loginResponse.NombrePerfil);
+            }
 
             return RedirectToAction("Index", "Home");
         }
 
-
         #endregion
-
 
         #region Crear Usuarios
 
-        [HttpGet]
+        // GET: /registro
+        [HttpGet("registro")]
         public IActionResult Registro()
         {
-            return View();
+            return View("Registro", new UsuarioModel());
         }
 
-        [HttpPost]
-        public IActionResult Registro(UsuarioModel usuario)
+        // POST: /registro
+        [HttpPost("registro")]
+        public async Task<IActionResult> RegistroPost(UsuarioModel vm)
         {
-            using (var context = _factory.CreateClient())
+            if (!ModelState.IsValid)
             {
-                var urlApi = _configuration["Valores:UrlAPI"] + "Home/Registro";
-                var resultado = context.PostAsJsonAsync(urlApi, usuario).Result;
+                TempData["Error"] = "Complete los campos requeridos.";
+                return View("Registro", vm);
+            }
 
-                if (!string.Equals(usuario.Contrasena, usuario.ConfirmarContrasena))
+            if (vm.Contrasena != vm.ConfirmarContrasena)
+            {
+                TempData["Error"] = "Las contrase帽as no coinciden.";
+                ModelState.AddModelError(nameof(vm.ConfirmarContrasena), "Debe coincidir con la contrase帽a.");
+                return View("Registro", vm);
+            }
+
+            try
+            {
+                using var http = _factory.CreateClient();
+                var url = _configuration["Valores:UrlAPI"] + "Home/Registro";
+
+                var payload = new
                 {
-                    TempData["Error"] = "Las contrase馻s no coinciden.";
-                    ModelState.AddModelError(nameof(usuario.ConfirmarContrasena), "Debe coincidir con la contrase馻.");
-                    return View("Registro", usuario);
+                    Cedula = vm.Cedula,
+                    Nombre = vm.Nombre,
+                    Apellidos = vm.Apellidos,
+                    Telefono = vm.Telefono,
+                    CorreoElectronico = vm.CorreoElectronico,
+                    Contrasena = vm.Contrasena,
+                    ConfirmarContrasena = vm.ConfirmarContrasena
+                };
+
+                var res = await http.PostAsJsonAsync(url, payload);
+
+                if (!res.IsSuccessStatusCode)
+                {
+                   
+                    var apiMsg = await res.Content.ReadAsStringAsync();
+                    TempData["Error"] = !string.IsNullOrWhiteSpace(apiMsg) ? apiMsg : "No se pudo registrar. Verifique los datos o si ya existe el usuario/correo.";
+                    return View("Registro", vm);
                 }
 
-
-                if (resultado.IsSuccessStatusCode)
+                var idUsuario = await res.Content.ReadFromJsonAsync<int>();
+                if (idUsuario > 0)
                 {
-                    var datosApi = resultado.Content.ReadFromJsonAsync<int>().Result;
-
-                    if (datosApi > 0)
-                        return RedirectToAction("Login", "Home");
+                    TempData["Msg"] = "Registro exitoso. Ahora puedes iniciar sesi贸n.";
+                    return RedirectToAction("Index", "Home");
                 }
-
-                ViewBag.Mensaje = "No se ha registrado la informaci髇";
-                return View();
+                else if (idUsuario == -1)
+                {
+                    TempData["Error"] = "La c茅dula ya existe.";
+                }
+                else if (idUsuario == -2)
+                {
+                    TempData["Error"] = "El correo ya existe.";
+                }
+                else
+                {
+                    TempData["Error"] = "No se ha registrado la informaci贸n.";
+                }
+                return View("Registro", vm);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Ocurri贸 un error inesperado: {ex.Message}";
+                return View("Registro", vm);
             }
         }
 
         #endregion
+
+      
+        // RECUPERAR (GET/POST) 
+        
+        [HttpGet("recuperar")]
+        public IActionResult Recuperar() => View();
 
         #region Recuperar Acceso
 

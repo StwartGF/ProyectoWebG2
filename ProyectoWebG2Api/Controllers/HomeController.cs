@@ -91,13 +91,13 @@ WHERE Correo = @Correo;";
             {
                 ConsecutivoUsuario = row.ConsecutivoUsuario,
                 Nombre = row.Nombre,
-                NombrePerfil = "Usuario" // adáptalo si manejas perfiles
+                NombrePerfil = "Usuario" 
             };
 
             return Ok(respuesta);
         }
 
-        // ===== Helpers de contraseña (PBKDF2 v1) =====
+        // ===== Helpers de contraseña  =====
         private static string HashPassword(string password)
         {
             const int iterations = 100_000;
@@ -118,7 +118,7 @@ WHERE Correo = @Correo;";
 
         private static bool VerifyPassword(string password, string stored)
         {
-            // Formato esperado: v1$<iterations>$<saltB64>$<hashB64>
+         
             var parts = stored.Split('$');
             if (parts.Length != 4 || parts[0] != "v1") return false;
 

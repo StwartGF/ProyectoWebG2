@@ -1,7 +1,7 @@
 ﻿@{
     var title = ViewData["Title"] as string ?? "Dashboard";
     var nombre = Context.Session.GetString("NombreUsuario") ?? "";
-    var rol = Context.Session.GetString("NombrePerfil") ?? ""; // <— aquí usamos NombrePerfil
+    var rol = Context.Session.GetString("NombrePerfil") ?? "";
 }
 <!doctype html>
 <html lang="es">
@@ -9,122 +9,62 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>@title - ProyectoWebG2</title>
-
-    <!-- CoreUI -->
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/css/coreui.min.css" />
-
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
-
     <style>
-        .brand-blob {
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            background: #6610f2;
-            display: inline-block
-        }
-
-        .sidebar .nav-link.active {
-            background: var(--cui-body-bg);
-            color: var(--cui-emphasis-color)
-        }
+        .sidebar { min-width: 220px; max-width: 220px; background: #212529; color: #fff; }
+        .sidebar .nav-link { color: #fff; }
+        .sidebar .nav-link.active, .sidebar .nav-link:focus { background: #495057; color: #fff; }
+        .sidebar .sidebar-header { padding: 1rem; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="sidebar sidebar-dark sidebar-fixed border-end" id="sidebar">
-        <div class="sidebar-header border-bottom">
-            <div class="sidebar-brand d-flex align-items-center gap-2">
-                <span class="brand-blob"></span>
-                <span class="fw-semibold">ProyectoWebG2</span>
+    <div class="d-flex">
+        <!-- Sidebar -->
+        <nav class="sidebar d-flex flex-column vh-100">
+            <div class="sidebar-header">ProyectoWebG2</div>
+            <ul class="nav flex-column mb-auto">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : null)" asp-controller="Home" asp-action="Index">Inicio</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Matricula" asp-action="Index">Matrícula</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Calificaciones</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" asp-controller="Cursos" asp-action="Disponibles">Cursos Disponibles</a>
+                </li>
+            </ul>
+            <div class="mt-auto p-3 small">
+                @if (!string.IsNullOrWhiteSpace(nombre))
+                {
+                    <div class="text-truncate"><strong>@nombre</strong></div>
+                    <div class="text-truncate">@rol</div>
+                }
             </div>
-            <button class="btn-close d-lg-none" type="button" aria-label="Cerrar"
-                    onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"></button>
-        </div>
-
-        <ul class="sidebar-nav" data-coreui="navigation" data-simplebar>
-            <li class="nav-item">
-                <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : null)"
-                   asp-controller="Home" asp-action="Index">
-                    <span class="nav-icon"></span> Inicio
-                </a>
-            </li>
-            <li class="nav-title">Páginas</li>
-
-            <li class="nav-item">
-                    <span class="nav-icon"></span> Matricula
-                
-            </li>
-            <li class="nav-item">
-                
-                    <span class="nav-icon"></span> Cursos
-                
-            </li>
-
-            <li class="nav-item">
-
-                <span class="nav-icon"></span> Calificaciones
-
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" asp-controller="Home" asp-action="Registro">
-                    <span class="nav-icon"></span> Cursos Disponibles
-                </a>
-            </li>
-        </ul>
-
-        <div class="p-3 small text-body-secondary border-top">
-            @if (!string.IsNullOrWhiteSpace(nombre))
-            {
-                <div class="text-truncate"><strong>@nombre</strong></div>
-                <div class="text-truncate">@rol</div>
-            }
-        </div>
-
-        <div class="sidebar-footer border-top d-none d-md-flex">
-            <button class="sidebar-toggler" type="button" data-coreui-toggle="unfoldable"></button>
-        </div>
-    </div>
-
-    <div class="wrapper d-flex flex-column min-vh-100">
-        <header class="header header-sticky p-0 mb-4">
-            <div class="container-fluid border-bottom px-4 d-flex align-items-center">
-                <button class="header-toggler me-3" type="button"
-                        onclick="coreui.Sidebar.getInstance(document.querySelector('#sidebar')).toggle()"
-                        style="margin-inline-start:-14px;">
-                    <i class="icon cil-menu"></i>
-                </button>
-                <ul class="header-nav d-none d-lg-flex">
-                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Inicio</a></li>
-                </ul>
-                <ul class="header-nav ms-auto">
-                    <li class="nav-item"><a class="nav-link" href="#">🔔</a></li>
-                </ul>
-            </div>
-            <div class="container-fluid px-4">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb my-0">
-                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Inicio</a></li>
-                        <li class="breadcrumb-item active"><span>@title</span></li>
-                    </ol>
-                </nav>
-            </div>
-        </header>
-
-        <div class="body flex-grow-1">
-            <div class="container-lg px-4">
+        </nav>
+        <!-- Main content -->
+        <div class="flex-grow-1">
+            <header class="p-3 border-bottom bg-light">
+                <div class="container-fluid d-flex align-items-center">
+                    <span class="me-auto fw-bold">@title</span>
+                    <span>🔔</span>
+                </div>
+            </header>
+            <main class="container-lg py-4">
                 @RenderBody()
-            </div>
+            </main>
+            <footer class="footer px-4 py-2 bg-light border-top">
+                <div>© @DateTime.Now.Year ProyectoWebG2</div>
+            </footer>
         </div>
-
-        <footer class="footer px-4">
-            <div>© @DateTime.Now.Year ProyectoWebG2</div>
-            <div class="ms-auto">CoreUI layout</div>
-        </footer>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@@coreui/coreui@5/dist/js/coreui.bundle.min.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
