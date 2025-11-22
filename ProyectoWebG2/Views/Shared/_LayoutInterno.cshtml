@@ -24,30 +24,58 @@
         <nav class="sidebar d-flex flex-column vh-100">
             <div class="sidebar-header">ProyectoWebG2</div>
             <ul class="nav flex-column mb-auto">
+                <!-- Siempre visible para todos los usuarios -->
                 <li class="nav-item">
                     <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : null)" asp-controller="Home" asp-action="Index">Inicio</a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Matricula" asp-action="Index">Matrícula</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Calificaciones</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" asp-controller="Cursos" asp-action="Disponibles">Cursos Disponibles</a>
-                </li>
-            </ul>
-            <div class="mt-auto p-3 small">
-                @if (!string.IsNullOrWhiteSpace(nombre))
+
+                <!-- Mostrar solo para Administradores -->
+                @if (Context.Session.GetString("NombrePerfil") == "Administrador")
                 {
-                    <div class="text-truncate"><strong>@nombre</strong></div>
-                    <div class="text-truncate">@rol</div>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Matricula" asp-action="Index">Matrícula</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Calificaciones</a>
+                    </li>
                 }
-            </div>
+
+                <!-- Mostrar solo para Instructores -->
+                @if (Context.Session.GetString("NombrePerfil") == "Instructor")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Matricula" asp-action="Index">Matrícula</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Calificaciones</a>
+                    </li>
+                }
+
+                <!-- Mostrar solo para Estudiantes -->
+                @if (Context.Session.GetString("NombrePerfil") == "Estudiante")
+                {
+                    
+
+
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Calificaciones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="Cursos" asp-action="Disponibles">Cursos Disponibles</a>
+                    </li>
+                }
+            </ul>
         </nav>
+
         <!-- Main content -->
         <div class="flex-grow-1">
             <header class="p-3 border-bottom bg-light">
