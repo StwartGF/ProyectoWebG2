@@ -45,6 +45,7 @@ namespace ProyectoWebG2.Controllers
                 HttpContext.Session.SetInt32("ConsecutivoUsuario", loginResponse.ConsecutivoUsuario);
                 HttpContext.Session.SetString("NombreUsuario", loginResponse.Nombre);
                 HttpContext.Session.SetString("NombrePerfil", loginResponse.NombrePerfil);
+                HttpContext.Session.SetInt32("Rol", loginResponse.Rol);
             }
 
             return RedirectToAction("Index", "Home");

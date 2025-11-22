@@ -65,37 +65,49 @@ namespace ProyectoWebG2Api.Controllers
 
             using var cn = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
 
-            // Trae el hash para ese correo
+            // Trae el hash de la contraseña y el rol asociado al correo
             const string sql = @"
-SELECT TOP 1
-    IdUsuario       AS ConsecutivoUsuario,
-    Nombre,
-    Apellidos,
-    Correo          AS CorreoElectronico,
-    ContrasenaHash
-FROM dbo.Usuario
-WHERE Correo = @Correo;";
+    SELECT TOP 1
+        IdUsuario       AS ConsecutivoUsuario,
+        Nombre,
+        Apellidos,
+        Correo          AS CorreoElectronico,
+        ContrasenaHash,
+        IdRol           AS Rol  -- Agregamos el ID del rol
+    FROM dbo.Usuario
+    WHERE Correo = @Correo;";
 
             var row = await cn.QueryFirstOrDefaultAsync<UsuarioDbRow>(sql, new { Correo = usuario.CorreoElectronico });
 
             if (row is null)
                 return Unauthorized("Credenciales inválidas.");
 
-            // Verifica el hash PBKDF2
+            // Verifica el hash de la contraseña
             var ok = VerifyPassword(usuario.Contrasena, row.ContrasenaHash);
             if (!ok)
                 return Unauthorized("Credenciales inválidas.");
 
-            // Respuesta mínima que tu MVC entiende
+            // Asignar NombrePerfil basado en el ID del rol (IdRol) de la base de datos
+            string nombrePerfil = row.Rol switch
+            {
+                1 => "Administrador",   // Si el rol es 1, es Administrador
+                2 => "Instructor",      // Si el rol es 2, es Instructor
+                3 => "Estudiante",      // Si el rol es 3, es Estudiante
+                _ => "Usuario"          // Rol por defecto si no se encuentra
+            };
+
+            // Respuesta con los datos del usuario
             var respuesta = new SesionResponse
             {
                 ConsecutivoUsuario = row.ConsecutivoUsuario,
                 Nombre = row.Nombre,
-                NombrePerfil = "Usuario" 
+                NombrePerfil = nombrePerfil,  // Nombre del perfil que se guarda en la sesión
+                Rol = row.Rol  // ID del rol que se guarda en la sesión
             };
 
             return Ok(respuesta);
         }
+
 
         // ===== Helpers de contraseña  =====
         private static string HashPassword(string password)
@@ -145,6 +157,7 @@ WHERE Correo = @Correo;";
             public string Apellidos { get; set; } = "";
             public string CorreoElectronico { get; set; } = "";
             public string ContrasenaHash { get; set; } = "";
+            public int Rol { get; set; }
         }
 
         private sealed class SesionResponse
@@ -152,6 +165,7 @@ WHERE Correo = @Correo;";
             public int ConsecutivoUsuario { get; set; }
             public string Nombre { get; set; } = "";
             public string NombrePerfil { get; set; } = "";
+            public int Rol { get; set; }
         }
 
         public sealed class LoginRequest
