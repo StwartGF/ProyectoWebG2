@@ -170,6 +170,16 @@ namespace ProyectoWebG2.Controllers
         }
 
         #endregion
+        
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            // Limpia toda la sesión
+            HttpContext.Session.Clear();
+
+            // Llévalo al login
+            return RedirectToAction("Login", "Home");
+        }
 
         [Seguridad]
         [HttpGet]

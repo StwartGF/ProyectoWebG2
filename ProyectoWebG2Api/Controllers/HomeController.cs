@@ -41,6 +41,7 @@ namespace ProyectoWebG2Api.Controllers
             p.Add("@Telefono", usuario.Telefono);
             p.Add("@Correo", usuario.CorreoElectronico);
             p.Add("@ContrasenaHash", contrasenaHash);
+            p.Add("@idRol", usuario.idRol);
 
             var resultado = await cn.ExecuteScalarAsync<int>(
                 "dbo.Registro",
@@ -90,10 +91,10 @@ namespace ProyectoWebG2Api.Controllers
             // Asignar NombrePerfil basado en el ID del rol (IdRol) de la base de datos
             string nombrePerfil = row.Rol switch
             {
-                1 => "Administrador",   // Si el rol es 1, es Administrador
-                2 => "Instructor",      // Si el rol es 2, es Instructor
-                3 => "Estudiante",      // Si el rol es 3, es Estudiante
-                _ => "Usuario"          // Rol por defecto si no se encuentra
+                1 => "Administrador",   
+                2 => "Estudiante",
+                3 => "Instructor",      
+               
             };
 
             // Respuesta con los datos del usuario
