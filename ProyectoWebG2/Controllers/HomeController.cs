@@ -45,6 +45,7 @@ namespace ProyectoWebG2.Controllers
                 HttpContext.Session.SetInt32("ConsecutivoUsuario", loginResponse.ConsecutivoUsuario);
                 HttpContext.Session.SetString("NombreUsuario", loginResponse.Nombre);
                 HttpContext.Session.SetString("NombrePerfil", loginResponse.NombrePerfil);
+                HttpContext.Session.SetInt32("Rol", loginResponse.Rol);
             }
 
             return RedirectToAction("Index", "Home");
@@ -169,6 +170,16 @@ namespace ProyectoWebG2.Controllers
         }
 
         #endregion
+        
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            // Limpia toda la sesión
+            HttpContext.Session.Clear();
+
+            // Llévalo al login
+            return RedirectToAction("Login", "Home");
+        }
 
         [Seguridad]
         [HttpGet]
