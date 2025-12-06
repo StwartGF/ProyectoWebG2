@@ -22,7 +22,7 @@ namespace ProyectoWebG2Api.Controllers
             _environment = environment;
         }
 
-        // ========= REGISTRO =========
+        
         [HttpPost("Registro")]
         public async Task<IActionResult> Registro([FromBody] RegistroUsuarioRequestModel usuario)
         {
@@ -41,7 +41,11 @@ namespace ProyectoWebG2Api.Controllers
             p.Add("@Telefono", usuario.Telefono);
             p.Add("@Correo", usuario.CorreoElectronico);
             p.Add("@ContrasenaHash", contrasenaHash);
-            p.Add("@idRol", usuario.idRol);
+
+             if (usuario.idRol > 0)
+            {
+                p.Add("@IdRol", usuario.idRol);
+            }
 
             var resultado = await cn.ExecuteScalarAsync<int>(
                 "dbo.Registro",
@@ -52,9 +56,9 @@ namespace ProyectoWebG2Api.Controllers
             return resultado switch
             {
                 > 0 => Ok(resultado),
-                -1 => Conflict("La cédula ya existe."),
-                -2 => Conflict("El correo ya existe."),
-                _ => StatusCode(500, "No se pudo registrar.")
+                -1 => Conflict("La cedula ya existe"),
+                -2 => Conflict("El correo ya existe"),
+                _ => StatusCode(500, "No se pudo registrar")
             };
         }
 
@@ -66,7 +70,7 @@ namespace ProyectoWebG2Api.Controllers
 
             using var cn = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
 
-            // Trae el hash de la contraseña y el rol asociado al correo
+           
             const string sql = @"
     SELECT TOP 1
         IdUsuario       AS ConsecutivoUsuario,
@@ -83,34 +87,34 @@ namespace ProyectoWebG2Api.Controllers
             if (row is null)
                 return Unauthorized("Credenciales inválidas.");
 
-            // Verifica el hash de la contraseña
+          
             var ok = VerifyPassword(usuario.Contrasena, row.ContrasenaHash);
             if (!ok)
                 return Unauthorized("Credenciales inválidas.");
 
-            // Asignar NombrePerfil basado en el ID del rol (IdRol) de la base de datos
+            
             string nombrePerfil = row.Rol switch
             {
-                1 => "Administrador",   
+                1 => "Administrador",
                 2 => "Estudiante",
-                3 => "Instructor",      
-               
+                3 => "Instructor",
+                _ => "Desconocido"
             };
 
-            // Respuesta con los datos del usuario
+            
             var respuesta = new SesionResponse
             {
                 ConsecutivoUsuario = row.ConsecutivoUsuario,
                 Nombre = row.Nombre,
-                NombrePerfil = nombrePerfil,  // Nombre del perfil que se guarda en la sesión
-                Rol = row.Rol  // ID del rol que se guarda en la sesión
+                NombrePerfil = nombrePerfil, 
+                Rol = row.Rol  
             };
 
             return Ok(respuesta);
         }
 
 
-        // ===== Helpers de contraseña  =====
+       
         private static string HashPassword(string password)
         {
             const int iterations = 100_000;
@@ -131,7 +135,7 @@ namespace ProyectoWebG2Api.Controllers
 
         private static bool VerifyPassword(string password, string stored)
         {
-         
+            
             var parts = stored.Split('$');
             if (parts.Length != 4 || parts[0] != "v1") return false;
 
@@ -150,7 +154,7 @@ namespace ProyectoWebG2Api.Controllers
             return CryptographicOperations.FixedTimeEquals(hash, testHash);
         }
 
-        // ===== Tipos internos para mapear resultados =====
+
         private sealed class UsuarioDbRow
         {
             public int ConsecutivoUsuario { get; set; }
@@ -176,6 +180,12 @@ namespace ProyectoWebG2Api.Controllers
         }
     }
 }
+
+
+
+
+
+
 
 
 
