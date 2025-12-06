@@ -70,17 +70,17 @@
 </head>
 <body>
     <div class="d-flex">
-        <!-- Sidebar -->
+      
         <nav class="@sidebarClass d-flex flex-column vh-100">
             <div class="sidebar-header">ProyectoWebG2</div>
             <ul class="nav flex-column mb-auto">
-                <!-- Siempre visible para todos los usuarios -->
+               
                 <li class="nav-item">
                     <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : null)"
                        asp-controller="Home" asp-action="Index">Inicio</a>
                 </li>
 
-                <!-- Administrador -->
+              
                 @if (rol == "Administrador")
                 {
                     <li class="nav-item">
@@ -90,35 +90,38 @@
                         <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Calificaciones</a>
+                        <a class="nav-link" asp-controller="Calificaciones" asp-action="Index">Calificaciones</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Asistencias</a>
+                        <a class="nav-link" asp-controller="Asistencias" asp-action="Index">Asistencias</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">INSTRUCTORES</a>
+                        <a class="nav-link" asp-controller="Instructores" asp-action="Create">INSTRUCTORES</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" asp-controller="AsignarCursos" asp-action="Index">Asignar Cursos</a>
                     </li>
                 }
 
-                <!-- Instructor -->
+             
                 @if (rol == "Instructor")
                 {
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Matricula" asp-action="Index">Cursos</a>
+                        <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Cursos" asp-action="Index">Calificaciones</a>
+                        <a class="nav-link" asp-controller="Calificaciones" asp-action="Index">Calificaciones</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Estudiantes" asp-action="Calificaciones">Asistencia</a>
+                        <a class="nav-link" asp-controller="Asistencias" asp-action="Index">Asistencia</a>
                     </li>
                 }
 
-                <!-- Estudiante -->
+             
                 @if (rol == "Estudiante")
                 {
                     <li class="nav-item">
-                        <a class="nav-link" asp-controller="Cursos" asp-action="Index">Matricula</a>
+                        <a class="nav-link" asp-controller="Matricula" asp-action="Index">Matricula</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" asp-controller="Cursos" asp-action="Index">Cursos</a>
@@ -133,7 +136,7 @@
             </ul>
         </nav>
 
-        <!-- Main content -->
+       
         <div class="flex-grow-1">
             <header class="p-3 border-bottom bg-light">
                 <div class="container-fluid d-flex align-items-center">
@@ -145,7 +148,7 @@
 
                     <span class="me-3">🔔</span>
 
-                    <!-- Botón Cerrar sesión -->
+                    
                     <a asp-controller="Home"
                        asp-action="Logout"
                        class="btn btn-danger btn-sm text-white">

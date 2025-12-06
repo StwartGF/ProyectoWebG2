@@ -14,7 +14,8 @@ namespace ProyectoWebG2.Controllers
 
         public async Task<IActionResult> Index()
         {
-            var cursos = await _httpClient.GetFromJsonAsync<List<Curso>>("api/cursos");
+            // Con BaseAddress = https://localhost:7238/api/ la ruta correcta es "cursos"
+            var cursos = await _httpClient.GetFromJsonAsync<List<Curso>>("cursos");
             return View(cursos ?? new List<Curso>());
         }
     }
