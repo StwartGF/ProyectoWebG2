@@ -1,7 +1,17 @@
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
-builder.Services.AddHttpClient();
+
+var apiBaseUrl = builder.Configuration["Valores:UrlAPI"];
+builder.Services.AddHttpClient("api", client =>
+{
+    if (!string.IsNullOrWhiteSpace(apiBaseUrl))
+    {
+        client.BaseAddress = new Uri(apiBaseUrl);
+    }
+    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+});
+
 builder.Services.AddSession();
 
 var app = builder.Build();
