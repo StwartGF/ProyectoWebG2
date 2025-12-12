@@ -1,41 +1,38 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// MVC (Views + Controllers)
 builder.Services.AddControllersWithViews();
 
-// HttpClient para consumir la API
+var apiBaseUrl = builder.Configuration["Valores:UrlAPI"];
 builder.Services.AddHttpClient("api", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7201/");
+    if (!string.IsNullOrWhiteSpace(apiBaseUrl))
+    {
+        client.BaseAddress = new Uri(apiBaseUrl);
+    }
+    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
 });
 
-
-// Session para mantener datos del usuario logueado
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(60);
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
+builder.Services.AddSession();
 
 var app = builder.Build();
 
-if (!app.Environment.IsDevelopment())
-{
-    app.UseExceptionHandler("/Home/Error");
-    app.UseHsts();
-}
+app.UseExceptionHandler("/Error/MostrarError");
+
+app.UseHsts();
+
+app.UseSession();
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
 
 app.UseRouting();
 
-app.UseSession();        // <- importante: antes de MapControllerRoute
 app.UseAuthorization();
+
+app.MapStaticAssets();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Login}/{id?}")
+    .WithStaticAssets();
 
 app.Run();

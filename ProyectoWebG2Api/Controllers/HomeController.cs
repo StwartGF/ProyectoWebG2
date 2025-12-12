@@ -1,147 +1,195 @@
 ﻿using Dapper;
-using MailKit.Net.Smtp;
-using MailKit.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using MimeKit;
-using SM_ProyectoAPI.Models;
+using ProyectoWebG2Api.Models;
 using System.Data;
 using System.Security.Cryptography;
-using System.Text;
 
-namespace SM_ProyectoAPI.Controllers
+namespace ProyectoWebG2Api.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class HomeController : ControllerBase
     {
-        private readonly IConfiguration _cfg;
-        private readonly IHostEnvironment _env;
-        public HomeController(IConfiguration cfg, IHostEnvironment env)
+        private readonly IConfiguration _configuration;
+        private readonly IHostEnvironment _environment;
+
+        public HomeController(IConfiguration configuration, IHostEnvironment environment)
         {
-            _cfg = cfg;
-            _env = env;
+            _configuration = configuration;
+            _environment = environment;
         }
 
-        // POST api/Home/Registro
+        
         [HttpPost("Registro")]
-        public IActionResult Registro([FromBody] RegistroUsuarioRequestModel m)
+        public async Task<IActionResult> Registro([FromBody] RegistroUsuarioRequestModel usuario)
         {
-            if (!ModelState.IsValid) return BadRequest(-98);
-            if (m.Contrasenna != m.ContrasennaConfirmar) return BadRequest(-99);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            using var cn = new SqlConnection(_cfg["ConnectionStrings:BDConnection"]);
+            if (!string.Equals(usuario.Contrasena, usuario.ConfirmarContrasena))
+                return BadRequest("Las contraseñas no coinciden.");
+
+            var contrasenaHash = HashPassword(usuario.Contrasena);
+
+            using var cn = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
             var p = new DynamicParameters();
-            p.Add("@Identificacion", m.Identificacion);
-            p.Add("@Nombre", m.Nombre);
-            p.Add("@Apellidos", m.Apellidos);
-            p.Add("@CorreoElectronico", m.CorreoElectronico.Trim());
-            p.Add("@Telefono", string.IsNullOrWhiteSpace(m.Telefono) ? null : m.Telefono);
-            p.Add("@Fecha_Nacimiento", m.Fecha_Nacimiento);
-            p.Add("@NombreUsuario", m.NombreUsuario);
+            p.Add("@Cedula", usuario.Cedula);
+            p.Add("@Nombre", usuario.Nombre);
+            p.Add("@Apellidos", usuario.Apellidos);
+            p.Add("@Telefono", usuario.Telefono);
+            p.Add("@Correo", usuario.CorreoElectronico);
+            p.Add("@ContrasenaHash", contrasenaHash);
 
-            // Hash en API (BCrypt)
-            var hash = BCrypt.Net.BCrypt.HashPassword(m.Contrasenna);
-            p.Add("@ContrasenaHash", hash);
-            p.Add("@IdRol", m.IdRol ?? 2);
+             if (usuario.idRol > 0)
+            {
+                p.Add("@IdRol", usuario.idRol);
+            }
 
-            var result = cn.Execute("Registro", p, commandType: CommandType.StoredProcedure);
-            return Ok(result); // 1 OK, <0 duplicados
+            var resultado = await cn.ExecuteScalarAsync<int>(
+                "dbo.Registro",
+                p,
+                commandType: CommandType.StoredProcedure
+            );
+
+            return resultado switch
+            {
+                > 0 => Ok(resultado),
+                -1 => Conflict("La cedula ya existe"),
+                -2 => Conflict("El correo ya existe"),
+                _ => StatusCode(500, "No se pudo registrar")
+            };
         }
 
-        // POST api/Home/IniciarSesion
+        // ========= INICIAR SESIÓN =========
         [HttpPost("IniciarSesion")]
-        public IActionResult IniciarSesion([FromBody] ValidarSesionRequestModel login)
+        public async Task<IActionResult> IniciarSesion([FromBody] LoginRequest usuario)
         {
-            if (!ModelState.IsValid) return BadRequest();
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            using var cn = new SqlConnection(_cfg["ConnectionStrings:BDConnection"]);
-            var p = new DynamicParameters();
-            p.Add("@CorreoElectronico", login.CorreoElectronico);
-            p.Add("@Contrasenna", login.Contrasenna); // ignorado por el SP; validamos en API
+            using var cn = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
 
-            // 1) Traemos al usuario + hash
-            var row = cn.QueryFirstOrDefault<ValidarSesionResponse>(
-                "ValidarInicioSesion", p, commandType: CommandType.StoredProcedure);
+           
+            const string sql = @"
+    SELECT TOP 1
+        IdUsuario       AS ConsecutivoUsuario,
+        Nombre,
+        Apellidos,
+        Correo          AS CorreoElectronico,
+        ContrasenaHash,
+        IdRol           AS Rol  -- Agregamos el ID del rol
+    FROM dbo.Usuario
+    WHERE Correo = @Correo;";
 
-            if (row == null) return NotFound();
+            var row = await cn.QueryFirstOrDefaultAsync<UsuarioDbRow>(sql, new { Correo = usuario.CorreoElectronico });
 
-            // 2) Validamos el password comparando con hash
-            if (!BCrypt.Net.BCrypt.Verify(login.Contrasenna, row.ContrasenaHash))
-                return NotFound(); // credenciales inválidas
+            if (row is null)
+                return Unauthorized("Credenciales inválidas.");
 
-            // 3) No devolvemos el hash al MVC
-            row.ContrasenaHash = "";
+          
+            var ok = VerifyPassword(usuario.Contrasena, row.ContrasenaHash);
+            if (!ok)
+                return Unauthorized("Credenciales inválidas.");
 
-            return Ok(row);
+            
+            string nombrePerfil = row.Rol switch
+            {
+                1 => "Administrador",
+                2 => "Estudiante",
+                3 => "Instructor",
+                _ => "Desconocido"
+            };
+
+            
+            var respuesta = new SesionResponse
+            {
+                ConsecutivoUsuario = row.ConsecutivoUsuario,
+                Nombre = row.Nombre,
+                NombrePerfil = nombrePerfil, 
+                Rol = row.Rol  
+            };
+
+            return Ok(respuesta);
         }
 
-        // GET api/Home/RecuperarAcceso?CorreoElectronico=...
-        [HttpGet("RecuperarAcceso")]
-        public async Task<IActionResult> RecuperarAcceso([FromQuery] string CorreoElectronico)
+
+       
+        private static string HashPassword(string password)
         {
-            if (string.IsNullOrWhiteSpace(CorreoElectronico)) return BadRequest("Correo requerido.");
+            const int iterations = 100_000;
+            const int saltSize = 16;
+            const int keySize = 32;
 
-            using var cn = new SqlConnection(_cfg["ConnectionStrings:BDConnection"]);
+            var salt = RandomNumberGenerator.GetBytes(saltSize);
+            var hash = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                salt,
+                iterations,
+                HashAlgorithmName.SHA256,
+                keySize
+            );
 
-            // 1) Buscar usuario
-            var pVal = new DynamicParameters();
-            pVal.Add("@CorreoElectronico", CorreoElectronico.Trim());
-            var usuario = cn.QueryFirstOrDefault<ValidarSesionResponse>(
-                "ValidarUsuario", pVal, commandType: CommandType.StoredProcedure);
-
-            if (usuario == null) return NotFound();
-
-            // 2) Generar nueva contraseña y su hash
-            var nueva = GenerarContrasena();
-            var hash = BCrypt.Net.BCrypt.HashPassword(nueva);
-
-            // 3) Actualizar en BD
-            var pUpd = new DynamicParameters();
-            pUpd.Add("@ConsecutivoUsuario", usuario.ConsecutivoUsuario);
-            pUpd.Add("@ContrasenaHash", hash);
-            var actualizado = cn.Execute("ActualizarContrasenna", pUpd, commandType: CommandType.StoredProcedure);
-            if (actualizado <= 0) return StatusCode(500, "No se pudo actualizar la contraseña.");
-
-            // 4) Cargar plantilla y enviar correo
-            var ruta = Path.Combine(_env.ContentRootPath, "PlantillaCorreo.html");
-            var html = System.IO.File.ReadAllText(ruta, Encoding.UTF8)
-                        .Replace("{{Nombre}}", usuario.Nombre)
-                        .Replace("{{Contrasenna}}", nueva);
-
-            await EnviarCorreo(usuario.CorreoElectronico, "Recuperación de acceso", html);
-            return Ok(usuario);
+            return $"v1${iterations}${Convert.ToBase64String(salt)}${Convert.ToBase64String(hash)}";
         }
 
-        // === Helpers ===
-        private string GenerarContrasena()
+        private static bool VerifyPassword(string password, string stored)
         {
-            const int N = 8;
-            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-            var data = new byte[N];
-            using var rng = RandomNumberGenerator.Create();
-            rng.GetBytes(data);
-            var sb = new StringBuilder(N);
-            for (int i = 0; i < N; i++) sb.Append(chars[data[i] % chars.Length]);
-            return sb.ToString();
+            
+            var parts = stored.Split('$');
+            if (parts.Length != 4 || parts[0] != "v1") return false;
+
+            var iterations = int.Parse(parts[1]);
+            var salt = Convert.FromBase64String(parts[2]);
+            var hash = Convert.FromBase64String(parts[3]);
+
+            var testHash = Rfc2898DeriveBytes.Pbkdf2(
+                password,
+                salt,
+                iterations,
+                HashAlgorithmName.SHA256,
+                hash.Length
+            );
+
+            return CryptographicOperations.FixedTimeEquals(hash, testHash);
         }
 
-        private async Task EnviarCorreo(string destinatario, string asunto, string html)
-        {
-            var from = _cfg["Valores:CorreoSMTP"];
-            var pass = _cfg["Valores:ContrasennaSMTP"];
-            var msg = new MimeMessage();
-            msg.From.Add(new MailboxAddress("SM Web", from));
-            msg.To.Add(MailboxAddress.Parse(destinatario));
-            msg.Subject = asunto;
-            msg.Body = new TextPart("html") { Text = html };
 
-            using var smtp = new SmtpClient();
-            await smtp.ConnectAsync("smtp.office365.com", 587, SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(from, pass);
-            await smtp.SendAsync(msg);
-            await smtp.DisconnectAsync(true);
+        private sealed class UsuarioDbRow
+        {
+            public int ConsecutivoUsuario { get; set; }
+            public string Nombre { get; set; } = "";
+            public string Apellidos { get; set; } = "";
+            public string CorreoElectronico { get; set; } = "";
+            public string ContrasenaHash { get; set; } = "";
+            public int Rol { get; set; }
+        }
+
+        private sealed class SesionResponse
+        {
+            public int ConsecutivoUsuario { get; set; }
+            public string Nombre { get; set; } = "";
+            public string NombrePerfil { get; set; } = "";
+            public int Rol { get; set; }
+        }
+
+        public sealed class LoginRequest
+        {
+            public string CorreoElectronico { get; set; } = string.Empty;
+            public string Contrasena { get; set; } = string.Empty;
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
 

@@ -1,174 +1,201 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using ProyectoWebG2.Models;
 using System.Net.Http.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace ProyectoWebG2.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly IConfiguration _cfg;
+        private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _factory;
-
-        public HomeController(IConfiguration cfg, IHttpClientFactory factory)
+        public HomeController(IConfiguration configuration, IHttpClientFactory factory)
         {
-            _cfg = cfg;
+            _configuration = configuration;
             _factory = factory;
         }
 
-        // DTO interno para deserializar lo que devuelve el API al iniciar sesión
-        private sealed class ApiSesionResponse
-        {
-            public int ConsecutivoUsuario { get; set; }
-            public string Nombre { get; set; } = "";
-            public string NombrePerfil { get; set; } = "";
-        }
+        #region Iniciar Sesión
 
-        private string ApiBase => _cfg["Valores:UrlAPI"]!.TrimEnd('/') + "/";
-
-        // ============================================
-        // INDEX (GET)
-        // - Si NO hay sesión -> muestra Login
-        // - Si hay sesión     -> muestra tu dashboard (Views/Home/Index.cshtml)
-        // ============================================
-
-
-        //[HttpGet("")]
-        //public IActionResult Index()
-        //{
-        //  var logged = HttpContext.Session.GetInt32("ConsecutivoUsuario") != null;
-        //if (!logged)
-        //  return View("Login", new LoginVM()); // formulario
-
-        //            return View("Index"); // tu dashboard interno
-        //      }
-        //-
-        [HttpGet("")]
-        public IActionResult Index()
-        {
-            // ⚠️ Solo para pruebas
-            return View("Index");
-        }
-//-
-
-        // ============================================
-        // LOGIN (GET) - ruta dedicada al formulario
-        // Siempre muestra el login, útil para enlaces directos /login
-        // ============================================
-        [HttpGet("login")]
+        [HttpGet]
         public IActionResult Login()
         {
-            return View("Login", new LoginVM());
+            return View();
         }
 
-        // ============================================
-        // LOGIN (POST)
-        // Llama a: POST {UrlAPI}/Home/IniciarSesion
-        // ============================================
-        [HttpPost("login")]
-        public async Task<IActionResult> LoginPost(LoginVM vm)
+        [HttpPost]
+        public async Task<IActionResult> LoginPost(LoginVM usuario)
+        {
+            using var http = _factory.CreateClient();
+            var url = _configuration["Valores:UrlAPI"] + "Home/IniciarSesion";
+            var res = await http.PostAsJsonAsync(url, usuario);
+
+            if (!res.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Credenciales inválidas.";
+                return View("Login", usuario);
+            }
+
+            // Recibe el usuario autenticado desde la API
+            var loginResponse = await res.Content.ReadFromJsonAsync<UsuarioModel>();
+            if (loginResponse != null)
+            {
+                HttpContext.Session.SetString("IsAuth", "1");
+                HttpContext.Session.SetString("Email", loginResponse.CorreoElectronico ?? string.Empty);
+                HttpContext.Session.SetInt32("ConsecutivoUsuario", loginResponse.ConsecutivoUsuario);
+                HttpContext.Session.SetString("NombreUsuario", loginResponse.Nombre);
+                HttpContext.Session.SetString("NombrePerfil", loginResponse.NombrePerfil);
+                HttpContext.Session.SetInt32("Rol", loginResponse.Rol);
+            }
+
+            return RedirectToAction("Index", "Home");
+        }
+
+        #endregion
+
+        #region Crear Usuarios
+
+        // GET: /registro
+        [HttpGet("registro")]
+        public IActionResult Registro()
+        {
+            return View("Registro", new UsuarioModel());
+        }
+
+        // POST: /registro
+        [HttpPost("registro")]
+        public async Task<IActionResult> RegistroPost(UsuarioModel vm)
         {
             if (!ModelState.IsValid)
             {
                 TempData["Error"] = "Complete los campos requeridos.";
-                return View("Login", vm);
+                return View("Registro", vm);
+            }
+
+            if (vm.Contrasena != vm.ConfirmarContrasena)
+            {
+                TempData["Error"] = "Las contraseñas no coinciden.";
+                ModelState.AddModelError(nameof(vm.ConfirmarContrasena), "Debe coincidir con la contraseña.");
+                return View("Registro", vm);
             }
 
             try
             {
                 using var http = _factory.CreateClient();
-                var url = $"{ApiBase}Home/IniciarSesion";
+                var url = _configuration["Valores:UrlAPI"] + "Home/Registro";
 
-                var payload = new { CorreoElectronico = vm.CorreoElectronico, Contrasenna = vm.Contrasena };
+                var payload = new
+                {
+                    Cedula = vm.Cedula,
+                    Nombre = vm.Nombre,
+                    Apellidos = vm.Apellidos,
+                    Telefono = vm.Telefono,
+                    CorreoElectronico = vm.CorreoElectronico,
+                    Contrasena = vm.Contrasena,
+                    ConfirmarContrasena = vm.ConfirmarContrasena
+                };
+
                 var res = await http.PostAsJsonAsync(url, payload);
 
                 if (!res.IsSuccessStatusCode)
                 {
-                    TempData["Error"] = "Credenciales inválidas.";
-                    return View("Login", vm);
+                   
+                    var apiMsg = await res.Content.ReadAsStringAsync();
+                    TempData["Error"] = !string.IsNullOrWhiteSpace(apiMsg) ? apiMsg : "No se pudo registrar. Verifique los datos o si ya existe el usuario/correo.";
+                    return View("Registro", vm);
                 }
 
-                var data = await res.Content.ReadFromJsonAsync<ApiSesionResponse>();
-                if (data is null)
+                var idUsuario = await res.Content.ReadFromJsonAsync<int>();
+                if (idUsuario > 0)
                 {
-                    TempData["Error"] = "Respuesta inválida del servidor.";
-                    return View("Login", vm);
+                    TempData["Msg"] = "Registro exitoso. Ahora puedes iniciar sesión.";
+                    return RedirectToAction("Index", "Home");
                 }
-
-                // Guardar sesión para layouts internos
-                HttpContext.Session.SetInt32("ConsecutivoUsuario", data.ConsecutivoUsuario);
-                HttpContext.Session.SetString("NombreUsuario", data.Nombre);
-                HttpContext.Session.SetString("NombrePerfil", string.IsNullOrWhiteSpace(data.NombrePerfil) ? "Estudiante" : data.NombrePerfil);
-
-                // Ahora redirige a Index (dashboard interno)
-                return RedirectToAction("Index");
+                else if (idUsuario == -1)
+                {
+                    TempData["Error"] = "La cédula ya existe.";
+                }
+                else if (idUsuario == -2)
+                {
+                    TempData["Error"] = "El correo ya existe.";
+                }
+                else
+                {
+                    TempData["Error"] = "No se ha registrado la información.";
+                }
+                return View("Registro", vm);
             }
-            catch (HttpRequestException)
+            catch (Exception ex)
             {
-                TempData["Error"] = "No se pudo contactar el servidor. Verifique que la API esté en ejecución.";
-                return View("Login", vm);
-            }
-            catch
-            {
-                TempData["Error"] = "Ocurrió un error inesperado.";
-                return View("Login", vm);
+                TempData["Error"] = $"Ocurrió un error inesperado: {ex.Message}";
+                return View("Registro", vm);
             }
         }
 
-        // ============================================
-        // RECUPERAR (GET/POST) — sin cambios
-        // ============================================
+        #endregion
+
+      
+        // RECUPERAR (GET/POST) 
+        
         [HttpGet("recuperar")]
         public IActionResult Recuperar() => View();
 
-        [HttpPost("recuperar")]
-        public async Task<IActionResult> RecuperarPost(UsuarioModel vm)
+        #region Recuperar Acceso
+
+        [HttpGet]
+        public IActionResult RecuperarAcceso()
         {
-            if (string.IsNullOrWhiteSpace(vm.CorreoElectronico))
-            {
-                TempData["Error"] = "Ingrese su correo.";
-                return View("Recuperar", vm);
-            }
+            return View();
+        }
 
-            try
+        [HttpPost]
+        public IActionResult RecuperarAcceso(UsuarioModel usuario)
+        {
+            using (var context = _factory.CreateClient())
             {
-                using var http = _factory.CreateClient();
-                var url = $"{ApiBase}Home/RecuperarAcceso?CorreoElectronico={Uri.EscapeDataString(vm.CorreoElectronico)}";
+                var urlApi = _configuration["Valores:UrlAPI"] + "Home/RecuperarAcceso?CorreoElectronico=" + usuario.CorreoElectronico;
+                var resultado = context.GetAsync(urlApi).Result;
 
-                var res = await http.GetAsync(url);
-                if (res.IsSuccessStatusCode)
+                if (resultado.IsSuccessStatusCode)
                 {
-                    TempData["Msg"] = "Te enviamos un correo con la nueva contraseña.";
-                    return RedirectToAction("Login"); // vuelve al login
+                    var datosApi = resultado.Content.ReadFromJsonAsync<UsuarioModel>().Result;
+
+                    if (datosApi != null)
+                        return RedirectToAction("Login", "Home");
                 }
 
-                TempData["Error"] = "Correo no encontrado.";
-                return View("Recuperar", vm);
-            }
-            catch (HttpRequestException)
-            {
-                TempData["Error"] = "No se pudo contactar el servidor. Verifique que la API esté en ejecución.";
-                return View("Recuperar", vm);
-            }
-            catch
-            {
-                TempData["Error"] = "Ocurrió un error inesperado.";
-                return View("Recuperar", vm);
+                ViewBag.Mensaje = "No se ha recuperado el acceso";
+                return View();
             }
         }
 
-        // ============================================
-        // CERRAR SESIÓN
-        // ============================================
-        [HttpGet("logout")]
+        #endregion
+        
+        [HttpGet]
+        public IActionResult Logout()
+        {
+            // Limpia toda la sesión
+            HttpContext.Session.Clear();
+
+            // Llévalo al login
+            return RedirectToAction("Login", "Home");
+        }
+
+        [Seguridad]
+        [HttpGet]
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        [Seguridad]
+        [HttpGet]
         public IActionResult CerrarSesion()
         {
             HttpContext.Session.Clear();
-            // Al volver a Index, como no hay sesión, mostrará el Login
-            return RedirectToAction("Index");
+            return RedirectToAction("Login", "Home");
         }
+
     }
 }
-
-
-
 
