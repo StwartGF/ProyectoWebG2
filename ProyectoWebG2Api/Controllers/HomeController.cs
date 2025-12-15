@@ -15,25 +15,33 @@ namespace ProyectoWebG2Api.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IHostEnvironment _environment;
+        private readonly string _connectionString;
 
         public HomeController(IConfiguration configuration, IHostEnvironment environment)
         {
             _configuration = configuration;
             _environment = environment;
+
+            // conexion
+            _connectionString = configuration.GetConnectionString("BDConnection")
+                ?? throw new InvalidOperationException(
+                    "Falta la cadena de conexión 'BDConnection' en appsettings del ProyectoWebG2Api.");
         }
 
-        
+        // ========= REGISTRO =========
         [HttpPost("Registro")]
         public async Task<IActionResult> Registro([FromBody] RegistroUsuarioRequestModel usuario)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
             if (!string.Equals(usuario.Contrasena, usuario.ConfirmarContrasena))
                 return BadRequest("Las contraseñas no coinciden.");
 
             var contrasenaHash = HashPassword(usuario.Contrasena);
 
-            using var cn = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+            using var cn = new SqlConnection(_connectionString);
+
             var p = new DynamicParameters();
             p.Add("@Cedula", usuario.Cedula);
             p.Add("@Nombre", usuario.Nombre);
@@ -42,7 +50,8 @@ namespace ProyectoWebG2Api.Controllers
             p.Add("@Correo", usuario.CorreoElectronico);
             p.Add("@ContrasenaHash", contrasenaHash);
 
-             if (usuario.idRol > 0)
+            // Si viene el rol desde el front lo usamos (1=Admin, 2=Estudiante, 3=Instructor, etc.)
+            if (usuario.idRol > 0)
             {
                 p.Add("@IdRol", usuario.idRol);
             }
@@ -56,9 +65,9 @@ namespace ProyectoWebG2Api.Controllers
             return resultado switch
             {
                 > 0 => Ok(resultado),
-                -1 => Conflict("La cedula ya existe"),
-                -2 => Conflict("El correo ya existe"),
-                _ => StatusCode(500, "No se pudo registrar")
+                -1 => Conflict("La cédula ya existe."),
+                -2 => Conflict("El correo ya existe."),
+                _ => StatusCode(500, "No se pudo registrar el usuario.")
             };
         }
 
@@ -66,11 +75,11 @@ namespace ProyectoWebG2Api.Controllers
         [HttpPost("IniciarSesion")]
         public async Task<IActionResult> IniciarSesion([FromBody] LoginRequest usuario)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
-            using var cn = new SqlConnection(_configuration.GetConnectionString("BDConnection"));
+            using var cn = new SqlConnection(_connectionString);
 
-           
             const string sql = @"
     SELECT TOP 1
         IdUsuario       AS ConsecutivoUsuario,
@@ -82,17 +91,17 @@ namespace ProyectoWebG2Api.Controllers
     FROM dbo.Usuario
     WHERE Correo = @Correo;";
 
-            var row = await cn.QueryFirstOrDefaultAsync<UsuarioDbRow>(sql, new { Correo = usuario.CorreoElectronico });
+            var row = await cn.QueryFirstOrDefaultAsync<UsuarioDbRow>(
+                sql,
+                new { Correo = usuario.CorreoElectronico });
 
             if (row is null)
                 return Unauthorized("Credenciales inválidas.");
 
-          
             var ok = VerifyPassword(usuario.Contrasena, row.ContrasenaHash);
             if (!ok)
                 return Unauthorized("Credenciales inválidas.");
 
-            
             string nombrePerfil = row.Rol switch
             {
                 1 => "Administrador",
@@ -101,20 +110,19 @@ namespace ProyectoWebG2Api.Controllers
                 _ => "Desconocido"
             };
 
-            
             var respuesta = new SesionResponse
             {
                 ConsecutivoUsuario = row.ConsecutivoUsuario,
                 Nombre = row.Nombre,
-                NombrePerfil = nombrePerfil, 
-                Rol = row.Rol  
+                NombrePerfil = nombrePerfil,
+                Rol = row.Rol
             };
 
             return Ok(respuesta);
         }
 
+        // ========= HASH / VERIFICACIÓN =========
 
-       
         private static string HashPassword(string password)
         {
             const int iterations = 100_000;
@@ -135,7 +143,6 @@ namespace ProyectoWebG2Api.Controllers
 
         private static bool VerifyPassword(string password, string stored)
         {
-            
             var parts = stored.Split('$');
             if (parts.Length != 4 || parts[0] != "v1") return false;
 
@@ -154,6 +161,7 @@ namespace ProyectoWebG2Api.Controllers
             return CryptographicOperations.FixedTimeEquals(hash, testHash);
         }
 
+        // ========= DTOs internos =========
 
         private sealed class UsuarioDbRow
         {
@@ -180,6 +188,8 @@ namespace ProyectoWebG2Api.Controllers
         }
     }
 }
+
+
 
 
 

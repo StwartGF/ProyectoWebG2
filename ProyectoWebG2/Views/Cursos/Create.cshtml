@@ -1,0 +1,133 @@
+﻿@model ProyectoWebG2.Models.CursoVM
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "_LayoutInterno";
+    ViewData["Title"] = "Nuevo curso";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-0">Registrar nuevo curso</h2>
+        <small class="text-muted">
+            Complete la información del curso que estará disponible para los estudiantes.
+        </small>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                @* Errores generales del modelo *@
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Nombre del curso -->
+                    <div class="mb-3">
+                        <label asp-for="NombreCurso" class="form-label fw-semibold"></label>
+                        <input asp-for="NombreCurso" class="form-control" />
+                        <span asp-validation-for="NombreCurso" class="text-danger"></span>
+                    </div>
+
+                    <!-- Fechas -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaDeInicio" class="form-label fw-semibold"></label>
+                            <input asp-for="FechaDeInicio" class="form-control" type="date" />
+                            <span asp-validation-for="FechaDeInicio" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="FechaDeFinalizacion" class="form-label fw-semibold"></label>
+                            <input asp-for="FechaDeFinalizacion" class="form-control" type="date" />
+                            <span asp-validation-for="FechaDeFinalizacion" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Duración y cupos -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="DuracionCurso" class="form-label fw-semibold"></label>
+                            <div class="input-group">
+                                <input asp-for="DuracionCurso" class="form-control" type="number" min="1" />
+                                <span class="input-group-text">horas</span>
+                            </div>
+                            <span asp-validation-for="DuracionCurso" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="CuposDisponibles" class="form-label fw-semibold"></label>
+                            <input asp-for="CuposDisponibles" class="form-control" type="number" min="1" />
+                            <span asp-validation-for="CuposDisponibles" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Categoría y modalidad -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Categoria" class="form-label fw-semibold"></label>
+                            <input asp-for="Categoria" class="form-control" placeholder="Ej: Programación, Matemática..." />
+                            <span asp-validation-for="Categoria" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Modalidad" class="form-label fw-semibold"></label>
+                            <select asp-for="Modalidad" class="form-select">
+                                <option value="">-- Seleccione --</option>
+                                <option>Presencial</option>
+                                <option>Virtual</option>
+                                <option>Híbrido</option>
+                            </select>
+                            <span asp-validation-for="Modalidad" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Instructor -->
+                    <div class="mb-3">
+                        <label asp-for="IdInstructor" class="form-label fw-semibold"></label>
+                        <select asp-for="IdInstructor"
+                                class="form-select"
+                                asp-items="@(ViewBag.Instructores as IEnumerable<SelectListItem>)">
+                            <option value="">-- Sin instructor asignado --</option>
+                        </select>
+                        <span asp-validation-for="IdInstructor" class="text-danger"></span>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            Volver al listado
+                        </a>
+
+                        <button type="submit" class="btn btn-success">
+                            Guardar curso
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    @* Columna lateral opcional con info *@
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card border-0 bg-light h-100">
+            <div class="card-body">
+                <h5 class="fw-semibold mb-3">Consejos para registrar cursos</h5>
+                <ul class="mb-0">
+                    <li>Utilice un nombre claro y descriptivo.</li>
+                    <li>Verifique que las fechas de inicio y fin sean correctas.</li>
+                    <li>Defina cupos coherentes con la capacidad del grupo.</li>
+                    <li>Elija la modalidad según la forma en que se impartirá el curso.</li>
+                    <li>Asigne un instructor si ya está registrado en el sistema.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
