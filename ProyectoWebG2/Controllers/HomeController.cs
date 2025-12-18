@@ -9,6 +9,7 @@ namespace ProyectoWebG2.Controllers
     {
         private readonly IConfiguration _configuration;
         private readonly IHttpClientFactory _factory;
+
         public HomeController(IConfiguration configuration, IHttpClientFactory factory)
         {
             _configuration = configuration;
@@ -26,8 +27,14 @@ namespace ProyectoWebG2.Controllers
         [HttpPost]
         public async Task<IActionResult> LoginPost(LoginVM usuario)
         {
+            if (!ModelState.IsValid)
+                return View("Login", usuario);
+
             using var http = _factory.CreateClient();
-            var url = _configuration["Valores:UrlAPI"] + "Home/IniciarSesion";
+
+            var baseUrl = _configuration["Valores:UrlAPI"]; // ej: https://localhost:7238/
+            var url = $"{baseUrl}api/Home/IniciarSesion";   // ✅ ahora apunta a /api/Home/IniciarSesion
+
             var res = await http.PostAsJsonAsync(url, usuario);
 
             if (!res.IsSuccessStatusCode)
@@ -82,7 +89,8 @@ namespace ProyectoWebG2.Controllers
             try
             {
                 using var http = _factory.CreateClient();
-                var url = _configuration["Valores:UrlAPI"] + "Home/Registro";
+                var baseUrl = _configuration["Valores:UrlAPI"];          // https://localhost:7238/
+                var url = $"{baseUrl}api/Home/Registro";                  // ✅ /api/Home/Registro
 
                 var payload = new
                 {
@@ -99,9 +107,10 @@ namespace ProyectoWebG2.Controllers
 
                 if (!res.IsSuccessStatusCode)
                 {
-                   
                     var apiMsg = await res.Content.ReadAsStringAsync();
-                    TempData["Error"] = !string.IsNullOrWhiteSpace(apiMsg) ? apiMsg : "No se pudo registrar. Verifique los datos o si ya existe el usuario/correo.";
+                    TempData["Error"] = !string.IsNullOrWhiteSpace(apiMsg)
+                        ? apiMsg
+                        : "No se pudo registrar. Verifique los datos o si ya existe el usuario/correo.";
                     return View("Registro", vm);
                 }
 
@@ -134,13 +143,10 @@ namespace ProyectoWebG2.Controllers
 
         #endregion
 
-      
-        // RECUPERAR (GET/POST) 
-        
+        #region Recuperar Acceso
+
         [HttpGet("recuperar")]
         public IActionResult Recuperar() => View();
-
-        #region Recuperar Acceso
 
         [HttpGet]
         public IActionResult RecuperarAcceso()
@@ -153,7 +159,9 @@ namespace ProyectoWebG2.Controllers
         {
             using (var context = _factory.CreateClient())
             {
-                var urlApi = _configuration["Valores:UrlAPI"] + "Home/RecuperarAcceso?CorreoElectronico=" + usuario.CorreoElectronico;
+                var baseUrl = _configuration["Valores:UrlAPI"]; // https://localhost:7238/
+                var urlApi = $"{baseUrl}api/Home/RecuperarAcceso?CorreoElectronico={usuario.CorreoElectronico}";
+
                 var resultado = context.GetAsync(urlApi).Result;
 
                 if (resultado.IsSuccessStatusCode)
@@ -170,14 +178,11 @@ namespace ProyectoWebG2.Controllers
         }
 
         #endregion
-        
+
         [HttpGet]
         public IActionResult Logout()
         {
-            // Limpia toda la sesión
             HttpContext.Session.Clear();
-
-            // Llévalo al login
             return RedirectToAction("Login", "Home");
         }
 
@@ -195,7 +200,7 @@ namespace ProyectoWebG2.Controllers
             HttpContext.Session.Clear();
             return RedirectToAction("Login", "Home");
         }
-
     }
 }
+
 
