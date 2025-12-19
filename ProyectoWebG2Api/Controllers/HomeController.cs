@@ -22,13 +22,12 @@ namespace ProyectoWebG2Api.Controllers
             _configuration = configuration;
             _environment = environment;
 
-            // conexion
             _connectionString = configuration.GetConnectionString("BDConnection")
                 ?? throw new InvalidOperationException(
                     "Falta la cadena de conexión 'BDConnection' en appsettings del ProyectoWebG2Api.");
         }
 
-        // ========= REGISTRO =========
+
         [HttpPost("Registro")]
         public async Task<IActionResult> Registro([FromBody] RegistroUsuarioRequestModel usuario)
         {
@@ -50,7 +49,7 @@ namespace ProyectoWebG2Api.Controllers
             p.Add("@Correo", usuario.CorreoElectronico);
             p.Add("@ContrasenaHash", contrasenaHash);
 
-            // Si viene el rol desde el front lo usamos (1=Admin, 2=Estudiante, 3=Instructor, etc.)
+
             if (usuario.idRol > 0)
             {
                 p.Add("@IdRol", usuario.idRol);
@@ -71,7 +70,7 @@ namespace ProyectoWebG2Api.Controllers
             };
         }
 
-        // ========= INICIAR SESIÓN =========
+
         [HttpPost("IniciarSesion")]
         public async Task<IActionResult> IniciarSesion([FromBody] LoginRequest usuario)
         {
@@ -81,15 +80,15 @@ namespace ProyectoWebG2Api.Controllers
             using var cn = new SqlConnection(_connectionString);
 
             const string sql = @"
-    SELECT TOP 1
-        IdUsuario       AS ConsecutivoUsuario,
-        Nombre,
-        Apellidos,
-        Correo          AS CorreoElectronico,
-        ContrasenaHash,
-        IdRol           AS Rol  -- Agregamos el ID del rol
-    FROM dbo.Usuario
-    WHERE Correo = @Correo;";
+                SELECT TOP 1
+                    IdUsuario       AS ConsecutivoUsuario,
+                    Nombre,
+                    Apellidos,
+                    Correo          AS CorreoElectronico,
+                    ContrasenaHash,
+                    IdRol           AS Rol
+                FROM dbo.Usuario
+                WHERE Correo = @Correo;";
 
             var row = await cn.QueryFirstOrDefaultAsync<UsuarioDbRow>(
                 sql,
@@ -114,14 +113,14 @@ namespace ProyectoWebG2Api.Controllers
             {
                 ConsecutivoUsuario = row.ConsecutivoUsuario,
                 Nombre = row.Nombre,
+                Apellidos = row.Apellidos,
+                CorreoElectronico = row.CorreoElectronico,
                 NombrePerfil = nombrePerfil,
                 Rol = row.Rol
             };
 
             return Ok(respuesta);
         }
-
-        // ========= HASH / VERIFICACIÓN =========
 
         private static string HashPassword(string password)
         {
@@ -144,7 +143,8 @@ namespace ProyectoWebG2Api.Controllers
         private static bool VerifyPassword(string password, string stored)
         {
             var parts = stored.Split('$');
-            if (parts.Length != 4 || parts[0] != "v1") return false;
+            if (parts.Length != 4 || parts[0] != "v1")
+                return false;
 
             var iterations = int.Parse(parts[1]);
             var salt = Convert.FromBase64String(parts[2]);
@@ -161,7 +161,6 @@ namespace ProyectoWebG2Api.Controllers
             return CryptographicOperations.FixedTimeEquals(hash, testHash);
         }
 
-        // ========= DTOs internos =========
 
         private sealed class UsuarioDbRow
         {
@@ -177,6 +176,8 @@ namespace ProyectoWebG2Api.Controllers
         {
             public int ConsecutivoUsuario { get; set; }
             public string Nombre { get; set; } = "";
+            public string Apellidos { get; set; } = "";
+            public string CorreoElectronico { get; set; } = "";
             public string NombrePerfil { get; set; } = "";
             public int Rol { get; set; }
         }
@@ -188,10 +189,6 @@ namespace ProyectoWebG2Api.Controllers
         }
     }
 }
-
-
-
-
 
 
 
