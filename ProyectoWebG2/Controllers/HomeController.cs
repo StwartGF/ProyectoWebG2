@@ -32,8 +32,8 @@ namespace ProyectoWebG2.Controllers
 
             using var http = _factory.CreateClient();
 
-            var baseUrl = _configuration["Valores:UrlAPI"]; // ej: https://localhost:7238/
-            var url = $"{baseUrl}api/Home/IniciarSesion";   // ✅ ahora apunta a /api/Home/IniciarSesion
+            var baseUrl = _configuration["Valores:UrlAPI"];
+            var url = $"{baseUrl}api/Home/IniciarSesion";
 
             var res = await http.PostAsJsonAsync(url, usuario);
 
@@ -43,7 +43,6 @@ namespace ProyectoWebG2.Controllers
                 return View("Login", usuario);
             }
 
-            // Recibe el usuario autenticado desde la API
             var loginResponse = await res.Content.ReadFromJsonAsync<UsuarioModel>();
             if (loginResponse != null)
             {
@@ -53,10 +52,17 @@ namespace ProyectoWebG2.Controllers
                 HttpContext.Session.SetString("NombreUsuario", loginResponse.Nombre);
                 HttpContext.Session.SetString("NombrePerfil", loginResponse.NombrePerfil);
                 HttpContext.Session.SetInt32("Rol", loginResponse.Rol);
+
+
+                if (loginResponse.Rol == 2) 
+                {
+                    return RedirectToAction("Index", "Estudiantes");
+                }
             }
 
             return RedirectToAction("Index", "Home");
         }
+
 
         #endregion
 
