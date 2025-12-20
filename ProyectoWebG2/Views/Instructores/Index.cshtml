@@ -1,0 +1,178 @@
+﻿@model IEnumerable<ProyectoWebG2.Models.InstructorVM>
+
+@{
+    Layout = "_LayoutInterno";
+    ViewData["Title"] = "Instructores";
+}
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-0">Instructores</h2>
+        <small class="text-muted">
+            Listado de instructores registrados en la plataforma.
+        </small>
+    </div>
+    <div class="col-auto">
+        <a asp-controller="Instructores" asp-action="Create"
+           class="btn btn-success">
+            + Nuevo instructor
+        </a>
+    </div>
+</div>
+
+<!-- Mensajes generales -->
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success">@TempData["Msg"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0 align-middle">
+            <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Cédula</th>
+                    <th>Nombre completo</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th style="width: 140px;">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var i = 1;
+                }
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@i</td>
+                        <td>@item.Cedula</td>
+                        <td>@item.NombreCompleto</td>
+                        <td>@item.Telefono</td>
+                        <td>@item.Correo</td>
+                        <td>
+                            <button type="button"
+                                    class="btn btn-sm btn-outline-primary btn-edit-instructor"
+                                    data-id="@item.Id"
+                                    data-cedula="@item.Cedula"
+                                    data-nombre="@item.Nombre"
+                                    data-apellidos="@item.Apellidos"
+                                    data-telefono="@item.Telefono"
+                                    data-correo="@item.Correo">
+                                Editar
+                            </button>
+                        </td>
+                    </tr>
+                    i++;
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- MODAL EDITAR INSTRUCTOR -->
+<div class="modal fade" id="modalEditarInstructor" tabindex="-1" aria-labelledby="modalEditarInstructorLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="modalEditarInstructorLabel">Editar instructor</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <form id="formEditarInstructor" method="post">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" id="editId" name="Id" />
+
+                    <div class="mb-3">
+                        <label for="editCedula" class="form-label fw-semibold">Cédula</label>
+                        <input type="text" class="form-control" id="editCedula" name="Cedula" />
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editNombre" class="form-label fw-semibold">Nombre</label>
+                            <input type="text" class="form-control" id="editNombre" name="Nombre" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editApellidos" class="form-label fw-semibold">Apellidos</label>
+                            <input type="text" class="form-control" id="editApellidos" name="Apellidos" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editTelefono" class="form-label fw-semibold">Teléfono</label>
+                            <input type="text" class="form-control" id="editTelefono" name="Telefono" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editCorreo" class="form-label fw-semibold">Correo</label>
+                            <input type="email" class="form-control" id="editCorreo" name="Correo" />
+                        </div>
+                    </div>
+
+                    <!-- No editamos contraseña aquí, se mantiene tal cual está en BD -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        Actualizar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const editButtons = document.querySelectorAll(".btn-edit-instructor");
+            const modalEl = document.getElementById("modalEditarInstructor");
+            const form = document.getElementById("formEditarInstructor");
+
+            const inputId = document.getElementById("editId");
+            const inputCedula = document.getElementById("editCedula");
+            const inputNombre = document.getElementById("editNombre");
+            const inputApellidos = document.getElementById("editApellidos");
+            const inputTelefono = document.getElementById("editTelefono");
+            const inputCorreo = document.getElementById("editCorreo");
+
+            // Base URL para la acción Edit del controlador
+            const baseEditUrl = '@Url.Action("Edit", "Instructores")'; // -> /Instructores/Edit
+
+            editButtons.forEach(btn => {
+                btn.addEventListener("click", function () {
+                    const id = this.dataset.id;
+                    const cedula = this.dataset.cedula;
+                    const nombre = this.dataset.nombre;
+                    const apellidos = this.dataset.apellidos;
+                    const telefono = this.dataset.telefono;
+                    const correo = this.dataset.correo;
+
+                    // Rellenar campos del modal
+                    inputId.value = id;
+                    inputCedula.value = cedula;
+                    inputNombre.value = nombre;
+                    inputApellidos.value = apellidos;
+                    inputTelefono.value = telefono;
+                    inputCorreo.value = correo;
+
+                    // Ajustar la URL del form para incluir el id en la ruta
+                    form.action = baseEditUrl + "/" + id; // /Instructores/Edit/5
+
+                    // Mostrar modal
+                    const modal = new bootstrap.Modal(modalEl);
+                    modal.show();
+                });
+            });
+        });
+    </script>
+}
+

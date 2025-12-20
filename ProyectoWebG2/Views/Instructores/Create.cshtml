@@ -1,41 +1,114 @@
 @model ProyectoWebG2.Models.InstructorVM
+
 @{
     Layout = "_LayoutInterno";
-    ViewData["Title"] = "Crear Instructor";
+    ViewData["Title"] = "Crear instructor";
 }
-<h2 class="mb-4">Crear Instructor</h2>
-<form asp-action="Create" method="post">
-    <div class="mb-3">
-        <label class="form-label">Cédula</label>
-        <input asp-for="Cedula" class="form-control" />
+
+<div class="row mb-4">
+    <div class="col">
+        <h2 class="mb-0">Crear instructor</h2>
+        <small class="text-muted">
+            Registre los datos del instructor que podrá impartir cursos en la plataforma.
+        </small>
     </div>
-    <div class="mb-3">
-        <label class="form-label">Nombre</label>
-        <input asp-for="Nombre" class="form-control" />
+</div>
+
+<div class="row">
+    <!-- FORMULARIO PRINCIPAL -->
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <!-- Mensajes de validación -->
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                @if (TempData["Msg"] != null)
+                {
+                    <div class="alert alert-success">@TempData["Msg"]</div>
+                }
+                @if (TempData["Error"] != null)
+                {
+                    <div class="alert alert-danger">@TempData["Error"]</div>
+                }
+
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <!-- Cédula -->
+                    <div class="mb-3">
+                        <label asp-for="Cedula" class="form-label fw-semibold"></label>
+                        <input asp-for="Cedula" class="form-control" />
+                        <span asp-validation-for="Cedula" class="text-danger"></span>
+                    </div>
+
+                    <!-- Nombre y Apellidos -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Nombre" class="form-label fw-semibold"></label>
+                            <input asp-for="Nombre" class="form-control" />
+                            <span asp-validation-for="Nombre" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Apellidos" class="form-label fw-semibold"></label>
+                            <input asp-for="Apellidos" class="form-control" />
+                            <span asp-validation-for="Apellidos" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Teléfono y Correo -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Telefono" class="form-label fw-semibold"></label>
+                            <input asp-for="Telefono" class="form-control" />
+                            <span asp-validation-for="Telefono" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Correo" class="form-label fw-semibold"></label>
+                            <input asp-for="Correo" class="form-control" type="email" />
+                            <span asp-validation-for="Correo" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <!-- Contraseña -->
+                    <div class="mb-3">
+                        <label asp-for="ContrasenaHash" class="form-label fw-semibold">Contraseña</label>
+                        <input asp-for="ContrasenaHash" class="form-control" type="password" />
+                        <span asp-validation-for="ContrasenaHash" class="text-danger"></span>
+                    </div>
+
+                    <!-- Botones -->
+                    <div class="d-flex justify-content-between mt-4">
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                            Volver al inicio
+                        </a>
+
+                        <button type="submit" class="btn btn-primary"
+                                style="background-color:#4F1BBF; border-color:#4F1BBF;">
+                            Crear instructor
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label class="form-label">Apellidos</label>
-        <input asp-for="Apellidos" class="form-control" />
+
+    <!-- COLUMNA LATERAL DE CONSEJOS -->
+    <div class="col-lg-4 mt-4 mt-lg-0">
+        <div class="card border-0 bg-light h-100">
+            <div class="card-body">
+                <h5 class="fw-semibold mb-3">Consejos para registrar instructores</h5>
+                <ul class="mb-0">
+                    <li>Use la cédula real del instructor.</li>
+                    <li>Verifique el correo, se usará para comunicarse.</li>
+                    <li>El teléfono debe estar actualizado.</li>
+                    <li>La contraseña se almacena de forma segura (hash).</li>
+                    <li>El instructor podrá iniciar sesión y ver sus cursos.</li>
+                </ul>
+            </div>
+        </div>
     </div>
-    <div class="mb-3">
-        <label class="form-label">Teléfono</label>
-        <input asp-for="Telefono" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Correo</label>
-        <input asp-for="Correo" class="form-control" />
-    </div>
-    <div class="mb-3">
-        <label class="form-label">Contraseña</label>
-        <input asp-for="ContrasenaHash" class="form-control" type="password" />
-    </div>
-    <button type="submit" class="btn btn-primary">Crear</button>
-</form>
-@if (TempData["Msg"] != null)
-{
-    <div class="alert alert-success mt-3">@TempData["Msg"]</div>
-}
-@if (TempData["Error"] != null)
-{
-    <div class="alert alert-danger mt-3">@TempData["Error"]</div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
