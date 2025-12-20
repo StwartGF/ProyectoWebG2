@@ -15,7 +15,7 @@ namespace ProyectoWebG2.Controllers
         public async Task<IActionResult> Index()
         {
             var client = _factory.CreateClient("api");
-            var response = await client.GetAsync("admin/calificaciones");
+            var response = await client.GetAsync("api/Calificaciones");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             var data = JsonSerializer.Deserialize<List<CalificacionVM>>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
