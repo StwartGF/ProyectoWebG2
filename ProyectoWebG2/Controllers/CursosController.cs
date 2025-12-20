@@ -59,7 +59,7 @@ namespace ProyectoWebG2.Controllers
         }
 
         // ============================
-        // LISTAR CURSOS
+        // LISTAR CURSOS (ADMIN)
         // ============================
         [HttpGet]
         public async Task<IActionResult> Index()
@@ -105,6 +105,37 @@ namespace ProyectoWebG2.Controllers
             });
 
             ViewBag.Instructores = items;
+
+            return View(cursos);
+        }
+
+        // ============================
+        // CURSOS DISPONIBLES (ESTUDIANTE)
+        // GET: /Cursos/Disponibles
+        // ============================
+        [HttpGet]
+        public async Task<IActionResult> Disponibles()
+        {
+            var client = GetApiClient();
+            var cursos = new List<CursoVM>();
+
+            try
+            {
+                cursos = await client.GetFromJsonAsync<List<CursoVM>>(
+                             "api/cursos/disponibles")
+                         ?? new List<CursoVM>();
+            }
+            catch
+            {
+                // Error llamando al API
+                ViewBag.Error = "No se pudieron cargar los cursos disponibles.";
+                return View(cursos);   // Vista: Views/Cursos/Disponibles.cshtml
+            }
+
+            if (!cursos.Any())
+            {
+                ViewBag.Info = "No hay cursos disponibles en este momento.";
+            }
 
             return View(cursos);
         }
@@ -160,8 +191,6 @@ namespace ProyectoWebG2.Controllers
         // ============================
         // EDITAR (POST) – SOLO MODAL
         // ============================
-        // El formulario del modal manda TODOS los campos de CursoVM,
-        // incluyendo IdCurso, y aquí llamamos al API con PUT.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(CursoVM vm)
@@ -193,4 +222,5 @@ namespace ProyectoWebG2.Controllers
         }
     }
 }
+
 

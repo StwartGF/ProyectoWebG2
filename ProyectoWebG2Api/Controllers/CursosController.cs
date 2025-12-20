@@ -22,7 +22,7 @@ namespace ProyectoWebG2Api.Controllers
 
         // ==========================================
         // GET: api/cursos
-        // Lista todos los cursos
+        // Lista todos los cursos (para ADMIN)
         // ==========================================
         [HttpGet]
         public async Task<IActionResult> GetCursos()
@@ -49,6 +49,49 @@ namespace ProyectoWebG2Api.Controllers
                 FROM dbo.Curso AS c
                 LEFT JOIN dbo.Usuario AS u 
                     ON u.IdUsuario = c.IdInstructor;";
+
+            using var rd = await cmd.ExecuteReaderAsync();
+
+            while (await rd.ReadAsync())
+            {
+                lista.Add(MapCurso(rd));
+            }
+
+            return Ok(lista);
+        }
+
+        // ==========================================
+        // GET: api/cursos/disponibles
+        // Lista cursos disponibles (para ESTUDIANTE)
+        // ==========================================
+        [HttpGet("disponibles")]
+        public async Task<IActionResult> GetCursosDisponibles()
+        {
+            var lista = new List<Curso>();
+
+            await using var cn = new SqlConnection(_connectionString);
+            await cn.OpenAsync();
+
+            using var cmd = cn.CreateCommand();
+            cmd.CommandText = @"
+                SELECT 
+                    c.IdCurso,
+                    c.NombreCurso,
+                    c.FechaDeInicio,
+                    c.FechaDeFinalizacion,
+                    c.DuracionCurso,
+                    c.CuposDisponibles,
+                    c.Categoria,
+                    c.Modalidad,
+                    c.IdInstructor,
+                    NombreInstructor = 
+                        COALESCE(u.Nombre + ' ' + u.Apellidos, 'Por asignar')
+                FROM dbo.Curso AS c
+                LEFT JOIN dbo.Usuario AS u 
+                    ON u.IdUsuario = c.IdInstructor
+                WHERE 
+                    c.CuposDisponibles > 0
+                    AND c.FechaDeInicio >= CAST(GETDATE() AS date);";
 
             using var rd = await cmd.ExecuteReaderAsync();
 
@@ -227,5 +270,3 @@ namespace ProyectoWebG2Api.Controllers
         }
     }
 }
-
-
