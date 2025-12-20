@@ -1,0 +1,155 @@
+﻿@using Microsoft.AspNetCore.Http
+@{
+    Layout = "_LayoutInterno";
+    ViewData["Title"] = "Inicio";
+    var nombre = Context.Session.GetString("NombreUsuario") ?? "Usuario";
+    var rol = Context.Session.GetString("NombrePerfil") ?? "";
+}
+
+<div class="container-fluid">
+
+    <!-- HERO PRINCIPAL -->
+    <div class="row mb-4">
+        <div class="col-md-7">
+            <h1 class="fw-bold mb-2">Bienvenido, @nombre</h1>
+            <p class="text-muted mb-3">
+                Panel general del <strong>Instituto Horizonte Digital</strong>.
+                Desde aquí puedes gestionar cursos, matrículas, instructores y el avance académico
+                de nuestros estudiantes.
+            </p>
+
+            <div class="d-flex flex-wrap gap-2">
+                <a asp-controller="Cursos" asp-action="Index" class="btn btn-primary">
+                    Ver cursos activos
+                </a>
+                <a asp-controller="Matricula" asp-action="Index" class="btn btn-outline-primary">
+                    Gestionar matrículas
+                </a>
+                @if (rol == "Administrador")
+                {
+                    <a asp-controller="AdminInstructores" asp-action="Index" class="btn btn-outline-success">
+                        Administrar instructores
+                    </a>
+                }
+            </div>
+        </div>
+
+        <div class="col-md-5 mt-4 mt-md-0">
+            <!-- Imagen principal (coloca aquí una imagen real en tu proyecto) -->
+            <div class="card border-0 shadow-sm">
+                <img src="~/img/estudiantes-campus.jpg"
+                     class="card-img-top"
+                     alt="Estudiantes en el campus" />
+                <div class="card-body">
+                    <p class="mb-0 small text-muted">
+                        Comunidad académica conectada con la tecnología y el aprendizaje continuo.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TARJETAS RESUMEN -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white h-100" style="background-color:#0d6efd;">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title">Estudiantes</h5>
+                        <p class="card-text small">
+                            Más de 300 estudiantes activos en programas de tecnología y negocios.
+                        </p>
+                    </div>
+                    <span class="fw-bold">+300 activos</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white h-100" style="background-color:#20c997;">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title">Programas</h5>
+                        <p class="card-text small">
+                            Diplomados y cursos cortos orientados a la empleabilidad.
+                        </p>
+                    </div>
+                    <span class="fw-bold">15 programas</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white h-100" style="background-color:#ffc107;">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title">Docentes</h5>
+                        <p class="card-text small">
+                            Instructores con experiencia en la industria y formación académica.
+                        </p>
+                    </div>
+                    <span class="fw-bold">+25 instructores</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-6">
+            <div class="card text-white h-100" style="background-color:#dc3545;">
+                <div class="card-body d-flex flex-column justify-content-between">
+                    <div>
+                        <h5 class="card-title">Satisfacción</h5>
+                        <p class="card-text small">
+                            Estudiantes reportan una alta satisfacción con el acompañamiento académico.
+                        </p>
+                    </div>
+                    <span class="fw-bold">95 %</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SECCIÓN DOS COLUMNAS: INFO + IMÁGENES -->
+    <div class="row align-items-center mb-5">
+        <div class="col-lg-6">
+            <h3 class="fw-semibold mb-3">Sobre el Campus Horizonte Digital</h3>
+            <p class="text-muted">
+                Somos una institución académica especializada en formación profesional
+                en desarrollo web, análisis de datos y gestión de proyectos. Nuestro modelo
+                combina clases presenciales, virtuales y modalidad híbrida para adaptarse
+                a las necesidades de cada estudiante.
+            </p>
+            <ul class="text-muted">
+                <li>Plan de estudios actualizado con herramientas reales de la industria.</li>
+                <li>Acompañamiento personalizado y tutorías en línea.</li>
+                <li>Proyectos prácticos y simulaciones de entornos laborales.</li>
+            </ul>
+        </div>
+
+        <div class="col-lg-6 mt-4 mt-lg-0">
+            <div class="row g-3">
+                <div class="col-6">
+                    <img src="~/img/estudiantes-clase.jpg"
+                         class="img-fluid rounded-3 shadow-sm"
+                         alt="Estudiantes en clase" />
+                </div>
+                <div class="col-6">
+                    <img src="~/img/estudiantes-lab.jpg"
+                         class="img-fluid rounded-3 shadow-sm"
+                         alt="Laboratorio de computación" />
+                </div>
+                <div class="col-12">
+                    <img src="~/img/estudiantes-online.jpg"
+                         class="img-fluid rounded-3 shadow-sm"
+                         alt="Clases virtuales" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTA INFORMATIVA -->
+    <div class="alert alert-info small mb-0">
+        <strong>Nota:</strong> Toda la información mostrada es de carácter demostrativo
+        para el sistema académico del Campus Horizonte Digital.
+    </div>
+</div>
+

@@ -1,0 +1,245 @@
+﻿@model IEnumerable<ProyectoWebG2.Models.CursoVM>
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "_LayoutInterno";
+    ViewData["Title"] = "Cursos";
+
+    // Rol desde sesión
+    var rol = Context.Session.GetString("NombrePerfil") ?? "";
+
+    // Lista de instructores para el combo del modal
+    var instructores = ViewBag.Instructores as List<SelectListItem> ?? new();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Gestión de cursos</h2>
+        <small class="text-muted">
+            Listado de cursos registrados en la plataforma.
+        </small>
+    </div>
+
+    @* Solo mostrar el botón si es Administrador *@
+    @if (rol == "Administrador")
+    {
+        <a asp-action="Create" class="btn btn-success">
+            + Nuevo curso
+        </a>
+    }
+</div>
+
+@if (TempData["Msg"] != null)
+{
+    <div class="alert alert-success">@TempData["Msg"]</div>
+}
+@if (TempData["Error"] != null)
+{
+    <div class="alert alert-danger">@TempData["Error"]</div>
+}
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-info">
+        No hay cursos registrados todavía.
+        @if (rol == "Administrador")
+        {
+            @:Haz clic en <strong>“+ Nuevo curso”</strong> para agregar el primero.
+        }
+    </div>
+}
+else
+{
+    <div class="table-responsive shadow-sm rounded">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Nombre</th>
+                    <th>Fechas</th>
+                    <th>Duración</th>
+                    <th>Cupos</th>
+                    <th>Categoría</th>
+                    <th>Modalidad</th>
+                    <th>Instructor</th>
+                    @if (rol == "Administrador")
+                    {
+                        <th style="width:130px;"></th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model)
+                {
+                    <tr>
+                        <td>@c.NombreCurso</td>
+                        <td>
+                            @c.FechaDeInicio.ToString("dd/MM/yyyy")
+                            -
+                            @c.FechaDeFinalizacion.ToString("dd/MM/yyyy")
+                        </td>
+                        <td>@c.DuracionCurso h</td>
+                        <td>@c.CuposDisponibles</td>
+                        <td>@c.Categoria</td>
+                        <td>
+                            <span class="badge bg-primary">@c.Modalidad</span>
+                        </td>
+                        <td>
+                            @(string.IsNullOrEmpty(c.NombreInstructor)
+                                                ? "-"
+                                                : c.NombreInstructor)
+                </td>
+
+                @if (rol == "Administrador")
+                        {
+                            <td class="text-end">
+                                <!-- Botón que abre el modal de edición -->
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-primary me-1 btn-editar-curso"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditarCurso"
+                                        data-id="@c.IdCurso"
+                                        data-nombre="@c.NombreCurso"
+                                        data-inicio="@c.FechaDeInicio.ToString("yyyy-MM-dd")"
+                                        data-fin="@c.FechaDeFinalizacion.ToString("yyyy-MM-dd")"
+                                        data-duracion="@c.DuracionCurso"
+                                        data-cupos="@c.CuposDisponibles"
+                                        data-categoria="@c.Categoria"
+                                        data-modalidad="@c.Modalidad"
+                                        data-idinstructor="@(c.IdInstructor?.ToString() ?? "")">
+                                    Editar
+                                </button>
+
+                                <a asp-action="Delete"
+                                   asp-route-id="@c.IdCurso"
+                                   class="btn btn-sm btn-outline-danger">
+                                    Eliminar
+                                </a>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+<!-- =====================================================
+     MODAL: EDITAR CURSO (solo para Administrador)
+     ===================================================== -->
+@if (rol == "Administrador")
+{
+    <div class="modal fade" id="modalEditarCurso" tabindex="-1" aria-labelledby="modalEditarCursoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <form asp-controller="Cursos" asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalEditarCursoLabel">Editar curso</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+
+                    <div class="modal-body">
+                        <input type="hidden" id="IdCurso" name="IdCurso" />
+
+                        <div class="mb-3">
+                            <label for="NombreCurso" class="form-label fw-semibold">Nombre del curso</label>
+                            <input type="text" class="form-control" id="NombreCurso" name="NombreCurso" required />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="FechaDeInicio" class="form-label fw-semibold">Fecha de inicio</label>
+                                <input type="date" class="form-control" id="FechaDeInicio" name="FechaDeInicio" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="FechaDeFinalizacion" class="form-label fw-semibold">Fecha de finalización</label>
+                                <input type="date" class="form-control" id="FechaDeFinalizacion" name="FechaDeFinalizacion" required />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="DuracionCurso" class="form-label fw-semibold">Duración (horas)</label>
+                                <input type="number" class="form-control" id="DuracionCurso" name="DuracionCurso" min="1" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="CuposDisponibles" class="form-label fw-semibold">Cupos disponibles</label>
+                                <input type="number" class="form-control" id="CuposDisponibles" name="CuposDisponibles" min="0" required />
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="Categoria" class="form-label fw-semibold">Categoría</label>
+                                <input type="text" class="form-control" id="Categoria" name="Categoria" required />
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="Modalidad" class="form-label fw-semibold">Modalidad</label>
+                                <input type="text" class="form-control" id="Modalidad" name="Modalidad" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="IdInstructor" class="form-label fw-semibold">Instructor</label>
+                                <select class="form-select" id="IdInstructor" name="IdInstructor">
+                                    @foreach (var opt in instructores)
+                                    {
+                                        <option value="@opt.Value">@opt.Text</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-primary"
+                                style="background-color:#4F1BBF; border-color:#4F1BBF;">
+                            Actualizar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            var modal = document.getElementById("modalEditarCurso");
+            if (!modal) return;
+
+            modal.addEventListener("show.bs.modal", function (event) {
+                var button = event.relatedTarget;
+                if (!button) return;
+
+                var id = button.getAttribute("data-id");
+                var nombre = button.getAttribute("data-nombre");
+                var inicio = button.getAttribute("data-inicio");
+                var fin = button.getAttribute("data-fin");
+                var duracion = button.getAttribute("data-duracion");
+                var cupos = button.getAttribute("data-cupos");
+                var categoria = button.getAttribute("data-categoria");
+                var modalidad = button.getAttribute("data-modalidad");
+                var idInstructor = button.getAttribute("data-idinstructor") || "";
+
+                modal.querySelector("#IdCurso").value = id;
+                modal.querySelector("#NombreCurso").value = nombre;
+                modal.querySelector("#FechaDeInicio").value = inicio;
+                modal.querySelector("#FechaDeFinalizacion").value = fin;
+                modal.querySelector("#DuracionCurso").value = duracion;
+                modal.querySelector("#CuposDisponibles").value = cupos;
+                modal.querySelector("#Categoria").value = categoria;
+                modal.querySelector("#Modalidad").value = modalidad;
+
+                var selectInst = modal.querySelector("#IdInstructor");
+                if (selectInst) {
+                    selectInst.value = idInstructor;
+                }
+            });
+        });
+    </script>
+}
+

@@ -1,0 +1,31 @@
+@model List<ProyectoWebG2.Models.CalificacionVM>
+@{
+    Layout = "_LayoutInterno";
+    ViewData["Title"] = "Calificaciones";
+}
+<h2 class="mb-4">Todas las Calificaciones</h2>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Estudiante</th>
+            <th>Curso</th>
+            <th>Calificación</th>
+            <th>Estado</th>
+            <th>Inicio</th>
+            <th>Finalización</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.Nombre @c.Apellidos</td>
+                <td>@c.NombreCurso</td>
+                <td>@c.Calificacion</td>
+                <td>@c.Estado_Curso</td>
+                <td>@c.Fecha_Inicio</td>
+                <td>@c.Fecha_Finalizacion</td>
+            </tr>
+        }
+    </tbody>
+</table>
